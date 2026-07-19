@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GAME — YUINA</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .game-wrap {
+        margin: 30px auto 0;
+        width: min(100%, 720px);
+        padding: clamp(14px, 3vw, 26px);
+      }
+      .game-hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      .game-hud .score { color: var(--accent-music); }
+      .game-hud .time { color: var(--accent-movie); }
+      .game-hud .best { color: var(--text-dim); font-size: 0.85rem; }
+      #game-canvas {
+        display: block;
+        width: 100%;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #141936 0%, #1d1440 100%);
+        touch-action: none;
+        cursor: pointer;
+      }
+      .game-controls {
+        margin-top: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .howto {
+        margin: 26px auto 0;
+        width: min(100%, 720px);
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.9;
+        padding: 18px 24px;
+      }
+      .howto strong { color: var(--text); }
+      .drop-note { margin: 26px auto 0; width: min(100%, 720px); }
+    </style>
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">YUINA</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html">COMIC</a>
+        <a href="game.html" aria-current="page">GAME</a>
+        <a href="movie.html">MOVIE</a>
+        <a href="music.html">MUSIC</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="page-hero">
+        <p class="eyebrow">Game</p>
+        <h1><span class="gradient-text">スターキャッチ</span></h1>
+        <p class="lead">流れ落ちる星をバスケットでキャッチ！60秒でどこまでスコアを伸ばせるかな？</p>
+      </section>
+
+      <section class="game-wrap glass reveal">
+        <div class="game-hud">
+          <span class="score">SCORE: <span id="score">0</span></span>
+          <span class="time">TIME: <span id="time">60</span></span>
+          <span class="best">BEST: <span id="best">0</span></span>
+        </div>
+        <canvas id="game-canvas" width="680" height="440" aria-label="スターキャッチゲーム画面"></canvas>
+        <div class="game-controls">
+          <button class="btn" id="start-btn" type="button">▶ ゲームスタート</button>
+        </div>
+      </section>
+
+      <section class="howto glass reveal">
+        <strong>あそびかた</strong><br />
+        ・PC：<strong>← →キー</strong> または <strong>マウス移動</strong> でバスケットを操作<br />
+        ・スマホ：画面を<strong>指でドラッグ</strong>して操作<br />
+        ・⭐ 黄色い星 = 1点 ／ 💜 むらさきの星 = 3点 ／ 💣 爆弾はキャッチしないでね（-5点）
+      </section>
+
+      <p class="notice drop-note reveal">
+        Geminiで作成したゲームHTMLに差し替える場合は、そのファイルを
+        <code>games/</code> フォルダに置いて、このページからリンクするだけでOKです。
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with ♥</p>
+    </footer>
+
+    <script src="js/bgm.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      /* ===== スターキャッチ（ミニゲーム） ===== */
+      (() => {
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+        const timeEl = document.getElementById("time");
+        const bestEl = document.getElementById("best");
+        const startBtn = document.getElementById("start-btn");
+
+        const W = canvas.width;
+        const H = canvas.height;
+        const BASKET_W = 90;
+        const BASKET_H = 22;
+        const GAME_SECONDS = 60;
+        const BEST_KEY = "yuina-starcatch-best";
+
+        let running = false;
+        let score = 0;
+        let timeLeft = GAME_SECONDS;
+        let basketX = W / 2;
+        let items = [];
+        let stars = []; // 背景の星
+        let keys = {};
+        let lastSpawn = 0;
+        let lastTick = 0;
+        let rafId = null;
+
+        bestEl.textContent = localStorage.getItem(BEST_KEY) || "0";
+
+        for (let i = 0; i < 60; i++) {
+          stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.6 + 0.4 });
+        }
+
+        // --- 入力 ---
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            keys[e.key] = true;
+            if (running) e.preventDefault();
+          }
+        });
+        window.addEventListener("keyup", (e) => (keys[e.key] = false));
+
+        function pointerMove(clientX) {
+          const rect = canvas.getBoundingClientRect();
+          basketX = ((clientX - rect.left) / rect.width) * W;
+        }
+        canvas.addEventListener("mousemove", (e) => pointerMove(e.clientX));
+        canvas.addEventListener("touchmove", (e) => {
+          pointerMove(e.touches[0].clientX);
+          e.preventDefault();
+        }, { passive: false });
+
+        // --- アイテム生成 ---
+        function spawn() {
+          const r = Math.random();
+          let type = "star";
+          if (r > 0.85) type = "bomb";
+          else if (r > 0.65) type = "rare";
+          items.push({
+            type,
+            x: 30 + Math.random() * (W - 60),
+            y: -20,
+            vy: 2 + Math.random() * 2.4 + (GAME_SECONDS - timeLeft) * 0.03,
+            angle: Math.random() * Math.PI * 2,
+          });
+        }
+
+        function drawStarShape(x, y, r, color, angle) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ctx.beginPath();
+          for (let i = 0; i < 10; i++) {
+            const rad = i % 2 === 0 ? r : r * 0.45;
+            const a = (Math.PI / 5) * i - Math.PI / 2;
+            ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+          }
+          ctx.closePath();
+          ctx.fillStyle = color;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 14;
+          ctx.fill();
+          ctx.restore();
+        }
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+
+          // 背景の星
+          ctx.fillStyle = "rgba(255,255,255,0.5)";
+          stars.forEach((s) => {
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // アイテム
+          items.forEach((it) => {
+            if (it.type === "bomb") {
+              ctx.save();
+              ctx.translate(it.x, it.y);
+              ctx.beginPath();
+              ctx.arc(0, 0, 12, 0, Math.PI * 2);
+              ctx.fillStyle = "#3a3a4a";
+              ctx.shadowColor = "#ff5252";
+              ctx.shadowBlur = 10;
+              ctx.fill();
+              ctx.strokeStyle = "#ff8a80";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(0, -12);
+              ctx.lineTo(6, -20);
+              ctx.stroke();
+              ctx.restore();
+            } else if (it.type === "rare") {
+              drawStarShape(it.x, it.y, 14, "#c39bff", it.angle);
+            } else {
+              drawStarShape(it.x, it.y, 12, "#ffd76b", it.angle);
+            }
+          });
+
+          // バスケット
+          const bx = Math.max(BASKET_W / 2, Math.min(W - BASKET_W / 2, basketX));
+          const grad = ctx.createLinearGradient(bx - BASKET_W / 2, 0, bx + BASKET_W / 2, 0);
+          grad.addColorStop(0, "#8f7cf0");
+          grad.addColorStop(1, "#4dd6ff");
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.roundRect(bx - BASKET_W / 2, H - 40, BASKET_W, BASKET_H, 10);
+          ctx.fill();
+
+          if (!running) {
+            ctx.fillStyle = "rgba(232,234,246,0.85)";
+            ctx.font = "700 22px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(timeLeft === 0 ? "TIME UP! もう一度あそぶ？" : "スタートボタンを押してね", W / 2, H / 2);
+          }
+        }
+
+        function update(dt) {
+          if (keys["ArrowLeft"]) basketX -= 420 * dt;
+          if (keys["ArrowRight"]) basketX += 420 * dt;
+
+          const bx = Math.max(BASKET_W / 2, Math.min(W - BASKET_W / 2, basketX));
+          items.forEach((it) => {
+            it.y += it.vy * 60 * dt;
+            it.angle += 2 * dt;
+          });
+
+          // 当たり判定
+          items = items.filter((it) => {
+            const caught =
+              it.y > H - 48 && it.y < H - 10 && Math.abs(it.x - bx) < BASKET_W / 2 + 10;
+            if (caught) {
+              if (it.type === "bomb") score = Math.max(0, score - 5);
+              else if (it.type === "rare") score += 3;
+              else score += 1;
+              scoreEl.textContent = score;
+              return false;
+            }
+            return it.y < H + 30;
+          });
+        }
+
+        function loop(ts) {
+          if (!running) return;
+          if (!lastTick) lastTick = ts;
+          const dt = Math.min((ts - lastTick) / 1000, 0.05);
+          lastTick = ts;
+
+          if (ts - lastSpawn > Math.max(280, 700 - (GAME_SECONDS - timeLeft) * 8)) {
+            spawn();
+            lastSpawn = ts;
+          }
+
+          update(dt);
+          draw();
+          rafId = requestAnimationFrame(loop);
+        }
+
+        let timerId = null;
+        function startGame() {
+          running = true;
+          score = 0;
+          timeLeft = GAME_SECONDS;
+          items = [];
+          lastSpawn = 0;
+          lastTick = 0;
+          scoreEl.textContent = "0";
+          timeEl.textContent = timeLeft;
+          startBtn.textContent = "プレイ中…";
+          startBtn.disabled = true;
+
+          clearInterval(timerId);
+          timerId = setInterval(() => {
+            timeLeft--;
+            timeEl.textContent = timeLeft;
+            if (timeLeft <= 0) endGame();
+          }, 1000);
+
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(loop);
+        }
+
+        function endGame() {
+          running = false;
+          clearInterval(timerId);
+          const best = Number(localStorage.getItem(BEST_KEY) || 0);
+          if (score > best) {
+            localStorage.setItem(BEST_KEY, String(score));
+            bestEl.textContent = score;
+          }
+          startBtn.textContent = "▶ もう一度あそぶ";
+          startBtn.disabled = false;
+          draw();
+        }
+
+        startBtn.addEventListener("click", startGame);
+        draw();
+      })();
+    </script>
+  </body>
+</html>

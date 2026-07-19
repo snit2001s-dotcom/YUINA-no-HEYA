@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOVIE — YUINA</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .player-wrap {
+        margin: 30px auto 0;
+        width: min(100%, 860px);
+        padding: clamp(12px, 2.5vw, 22px);
+      }
+      .player-wrap video {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 14px;
+        background: #000;
+      }
+      .video-fallback {
+        display: none;
+        aspect-ratio: 16 / 9;
+        border-radius: 14px;
+        place-items: center;
+        text-align: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 30% 30%, rgba(77, 214, 255, 0.18), transparent 60%),
+          radial-gradient(circle at 70% 70%, rgba(143, 124, 240, 0.18), transparent 60%),
+          #141936;
+        color: var(--text-dim);
+        line-height: 2;
+      }
+      .video-fallback .clap { font-size: 3rem; display: block; margin-bottom: 10px; }
+      .movie-meta {
+        margin: 26px auto 0;
+        width: min(100%, 860px);
+        padding: 22px 26px;
+        color: var(--text-dim);
+        line-height: 1.9;
+      }
+      .movie-meta h2 { margin: 0 0 8px; color: var(--text); font-size: 1.2rem; }
+      .drop-note { margin: 26px auto 0; width: min(100%, 860px); }
+    </style>
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">YUINA</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html">COMIC</a>
+        <a href="game.html">GAME</a>
+        <a href="movie.html" aria-current="page">MOVIE</a>
+        <a href="music.html">MUSIC</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="page-hero">
+        <p class="eyebrow">Movie</p>
+        <h1><span class="gradient-text">ゆいなシアター</span></h1>
+        <p class="lead">映像で楽しむ、もうひとつのゆいなの世界。</p>
+      </section>
+
+      <section class="player-wrap glass reveal">
+        <video id="main-video" controls preload="metadata" playsinline>
+          <source src="assets/video/movie.mp4" type="video/mp4" />
+          お使いのブラウザは動画再生に対応していません。
+        </video>
+        <div class="video-fallback" id="video-fallback">
+          <div>
+            <span class="clap" aria-hidden="true">🎬</span>
+            ムービーは <strong>COMING SOON</strong><br />
+            公開までもう少しお待ちください！
+          </div>
+        </div>
+      </section>
+
+      <section class="movie-meta glass reveal">
+        <h2>作品について</h2>
+        <p>
+          Geminiで制作したオリジナルムービーを公開するコーナーです。
+          ページを開くとBGMが流れますが、動画の再生を始めると音がぶつからないよう、BGMは自動でフェードアウトします。
+        </p>
+      </section>
+
+      <p class="notice drop-note reveal">
+        動画ファイルは <code>assets/video/movie.mp4</code>
+        に置くと自動的にこのページで再生できるようになります。
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with ♥</p>
+    </footer>
+
+    <script src="js/bgm.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      // 動画ファイルが無い場合は COMING SOON 表示に切り替え
+      (() => {
+        const video = document.getElementById("main-video");
+        const fallback = document.getElementById("video-fallback");
+        video.addEventListener("error", showFallback, true);
+        const src = video.querySelector("source");
+        src.addEventListener("error", showFallback);
+        function showFallback() {
+          video.style.display = "none";
+          fallback.style.display = "grid";
+        }
+        // 動画再生中はBGMをオフにする案内（bgm.jsのトグルと連動）
+        video.addEventListener("play", () => {
+          const btn = document.querySelector(".bgm-toggle");
+          if (btn && btn.classList.contains("is-playing")) btn.click();
+        });
+      })();
+    </script>
+  </body>
+</html>

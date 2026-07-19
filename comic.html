@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COMIC — YUINA</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .comic-viewer {
+        margin: 30px auto 0;
+        width: min(100%, 640px);
+        padding: clamp(14px, 3vw, 24px);
+        text-align: center;
+      }
+      .comic-page {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+        display: grid;
+        place-items: center;
+      }
+      .comic-page img, .comic-page svg {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .pager {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 18px;
+      }
+      .pager .page-num { color: var(--text-dim); font-weight: 700; letter-spacing: 0.1em; }
+      .drop-note { margin: 26px auto 0; width: min(100%, 640px); }
+    </style>
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">YUINA</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html" aria-current="page">COMIC</a>
+        <a href="game.html">GAME</a>
+        <a href="movie.html">MOVIE</a>
+        <a href="music.html">MUSIC</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="page-hero">
+        <p class="eyebrow">Comic</p>
+        <h1><span class="gradient-text">ゆいなコミック</span></h1>
+        <p class="lead">ゆいなの日常を描いたオリジナルコミック。左右のボタンでページをめくれます。</p>
+      </section>
+
+      <section class="comic-viewer glass reveal">
+        <div class="comic-page" id="comic-page"></div>
+        <div class="pager">
+          <button class="btn ghost" id="prev-btn" type="button">← まえ</button>
+          <span class="page-num"><span id="cur-page">1</span> / <span id="max-page">3</span></span>
+          <button class="btn ghost" id="next-btn" type="button">つぎ →</button>
+        </div>
+      </section>
+
+      <p class="notice drop-note reveal">
+        コミック画像は <code>assets/comic/page1.png</code>、<code>page2.png</code>…
+        の名前で置くと自動的に表示されます。今はサンプルページを表示中です。
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with ♥</p>
+    </footer>
+
+    <script src="js/bgm.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      (() => {
+        const PAGE_COUNT = 3;
+        const pageEl = document.getElementById("comic-page");
+        const curEl = document.getElementById("cur-page");
+        const maxEl = document.getElementById("max-page");
+        const prevBtn = document.getElementById("prev-btn");
+        const nextBtn = document.getElementById("next-btn");
+        let page = 1;
+        maxEl.textContent = PAGE_COUNT;
+
+        // 画像が無いときに表示するサンプルページ（SVG）
+        function placeholderSvg(n) {
+          const colors = ["#ffe1f1", "#e3e9ff", "#e0fff4"];
+          const lines = [
+            ["ある日のゆいな。", "「今日はなにして", "あそぼうかな？」"],
+            ["ゲームをしたり、", "おんがくを聴いたり。", "たのしいことがいっぱい！"],
+            ["「また来てね！」", "つづきは", "COMING SOON…"],
+          ];
+          const texts = lines[n - 1]
+            .map((t, i) => `<text x="300" y="${330 + i * 56}" text-anchor="middle" font-size="34" font-family="sans-serif" fill="#5f4ea5">${t}</text>`)
+            .join("");
+          return `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800">
+              <rect width="600" height="800" fill="${colors[n - 1]}"/>
+              <rect x="24" y="24" width="552" height="752" rx="18" fill="#ffffff"/>
+              <circle cx="300" cy="180" r="90" fill="${colors[n - 1]}"/>
+              <circle cx="265" cy="165" r="10" fill="#5f4ea5"/>
+              <circle cx="335" cy="165" r="10" fill="#5f4ea5"/>
+              <path d="M265 210 Q300 240 335 210" fill="none" stroke="#5f4ea5" stroke-width="8" stroke-linecap="round"/>
+              ${texts}
+              <text x="300" y="740" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#9aa0c3">- ${n} -</text>
+            </svg>`;
+        }
+
+        function render() {
+          curEl.textContent = page;
+          prevBtn.disabled = page === 1;
+          nextBtn.disabled = page === PAGE_COUNT;
+
+          const img = new Image();
+          img.alt = `コミック ${page}ページ目`;
+          img.src = `assets/comic/page${page}.png`;
+          img.onload = () => {
+            pageEl.innerHTML = "";
+            pageEl.appendChild(img);
+          };
+          img.onerror = () => {
+            pageEl.innerHTML = placeholderSvg(page);
+          };
+        }
+
+        prevBtn.addEventListener("click", () => { if (page > 1) { page--; render(); } });
+        nextBtn.addEventListener("click", () => { if (page < PAGE_COUNT) { page++; render(); } });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") prevBtn.click();
+          if (e.key === "ArrowRight") nextBtn.click();
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

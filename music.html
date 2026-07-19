@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MUSIC — YUINA</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .tracks {
+        margin: 30px auto 0;
+        width: min(100%, 760px);
+        display: grid;
+        gap: 14px;
+      }
+      .track {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 16px;
+        align-items: center;
+        padding: 18px 20px;
+        transition: transform 0.25s ease, border-color 0.25s ease;
+      }
+      .track:hover { transform: translateX(6px); border-color: rgba(255, 196, 107, 0.45); }
+      .track .art {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, rgba(255, 196, 107, 0.25), rgba(255, 111, 174, 0.25));
+        border: 1px solid rgba(255, 196, 107, 0.35);
+      }
+      .track h3 { margin: 0 0 2px; font-size: 1.05rem; }
+      .track .artist { margin: 0 0 10px; color: var(--text-dim); font-size: 0.8rem; }
+      .track audio { width: 100%; height: 36px; }
+      .track .missing {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-style: italic;
+      }
+      .drop-note { margin: 30px auto 0; width: min(100%, 760px); }
+    </style>
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">YUINA</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html">COMIC</a>
+        <a href="game.html">GAME</a>
+        <a href="movie.html">MOVIE</a>
+        <a href="music.html" aria-current="page">MUSIC</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="page-hero">
+        <p class="eyebrow">Music</p>
+        <h1><span class="gradient-text">ゆいなミュージック</span></h1>
+        <p class="lead">SUNO AIで制作したオリジナル楽曲コレクション。ヘッドホン推奨です🎧</p>
+      </section>
+
+      <section class="tracks" id="tracks"></section>
+
+      <p class="notice drop-note reveal">
+        SUNO AIで作成した楽曲ファイル（mp3）を <code>assets/audio/</code> に
+        <code>track1.mp3</code>、<code>track2.mp3</code>… の名前で置くと、このページに自動でプレイヤーが表示されます。
+        曲名はこのページ内の <code>TRACKS</code> リストを編集してください。
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with ♥</p>
+    </footer>
+
+    <script src="js/bgm.js"></script>
+    <script src="js/reveal.js"></script>
+    <script>
+      // ===== 楽曲リスト（曲名はここを編集） =====
+      const TRACKS = [
+        { file: "assets/audio/track1.mp3", title: "ゆいなのテーマ", emoji: "🌸" },
+        { file: "assets/audio/track2.mp3", title: "星空セレナーデ", emoji: "🌟" },
+        { file: "assets/audio/track3.mp3", title: "おやすみのうた", emoji: "🌙" },
+      ];
+
+      (() => {
+        const wrap = document.getElementById("tracks");
+
+        TRACKS.forEach((t, i) => {
+          const el = document.createElement("article");
+          el.className = "track glass reveal";
+          el.innerHTML = `
+            <div class="art" aria-hidden="true">${t.emoji}</div>
+            <div>
+              <h3>${t.title}</h3>
+              <p class="artist">YUINA × SUNO AI — Track ${String(i + 1).padStart(2, "0")}</p>
+              <div class="player-slot"></div>
+            </div>`;
+          wrap.appendChild(el);
+
+          const slot = el.querySelector(".player-slot");
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.preload = "metadata";
+          audio.src = t.file;
+          audio.addEventListener("error", () => {
+            slot.innerHTML = `<span class="missing">🎵 COMING SOON — 楽曲ファイルを準備中です</span>`;
+          });
+          // 曲を再生したらBGMを止める＆他の曲も止める
+          audio.addEventListener("play", () => {
+            document.querySelectorAll("audio").forEach((a) => {
+              if (a !== audio) a.pause();
+            });
+            const btn = document.querySelector(".bgm-toggle");
+            if (btn && btn.classList.contains("is-playing")) btn.click();
+          });
+          slot.appendChild(audio);
+        });
+
+        // 動的追加後にrevealを再スキャン
+        document.querySelectorAll(".track.reveal").forEach((el, i) => {
+          setTimeout(() => el.classList.add("is-visible"), 120 * i);
+        });
+      })();
+    </script>
+  </body>
+</html>

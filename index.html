@@ -3,99 +3,223 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ゆいなのサイト</title>
+    <title>YUINA — Comic / Game / Movie / Music</title>
+    <meta name="description" content="ゆいなの公式サイト。Comic・Game・Movie・Musicの4つのコンテンツをお楽しみください。" />
+    <link rel="stylesheet" href="css/style.css" />
     <style>
-      :root {
-        color-scheme: light;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
+      /* ===== LP 専用スタイル ===== */
+      .hero {
+        min-height: calc(100svh - 70px);
         display: grid;
         place-items: center;
-        padding: 24px;
-        font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
-        color: #4a4a4a;
-        background:
-          radial-gradient(circle at 12% 18%, rgba(255, 205, 229, 0.3) 0 90px, transparent 100px),
-          radial-gradient(circle at 84% 16%, rgba(191, 231, 255, 0.25) 0 86px, transparent 96px),
-          radial-gradient(circle at 75% 82%, rgba(221, 255, 218, 0.25) 0 92px, transparent 102px),
-          linear-gradient(135deg, #fffaf5 0%, #fef6ff 45%, #f2fbff 100%);
+        text-align: center;
+        padding: clamp(40px, 8vw, 80px) 0;
       }
-
-      .card {
-        width: min(100%, 680px);
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #f2e8f8;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(151, 131, 172, 0.12);
-        padding: clamp(20px, 5vw, 36px);
-        display: grid;
-        gap: 18px;
-      }
-
-      h1 {
-        margin: 0;
-        font-size: clamp(1.8rem, 6vw, 2.4rem);
-        color: #5b4b8a;
-      }
-
-      p {
-        margin: 0;
-        line-height: 1.8;
-        font-size: clamp(1rem, 3.8vw, 1.1rem);
-      }
-
-      .hero-image {
-        width: min(100%, 420px);
-        margin-inline: auto;
-        display: block;
-        border-radius: 16px;
-        box-shadow: 0 8px 22px rgba(128, 112, 160, 0.18);
-      }
-
-      .next-button {
-        justify-self: center;
-        border: none;
-        border-radius: 999px;
-        padding: 12px 24px;
-        font-size: 1rem;
+      .hero .eyebrow {
+        font-size: 0.85rem;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #8f7cf0, #6ab8ff);
-        cursor: pointer;
-        box-shadow: 0 8px 18px rgba(102, 125, 255, 0.3);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        letter-spacing: 0.5em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin: 0 0 18px;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(3rem, 13vw, 7rem);
+        line-height: 1.05;
+        letter-spacing: 0.06em;
+      }
+      .hero .lead {
+        margin: 26px auto 0;
+        max-width: 38em;
+        color: var(--text-dim);
+        line-height: 2;
+        font-size: clamp(0.95rem, 2.6vw, 1.1rem);
+      }
+      .hero .cta {
+        margin-top: 40px;
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .scroll-hint {
+        margin-top: 60px;
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        letter-spacing: 0.3em;
+        animation: bob 2.2s ease-in-out infinite;
+      }
+      @keyframes bob {
+        0%, 100% { transform: translateY(0); opacity: 0.6; }
+        50% { transform: translateY(8px); opacity: 1; }
       }
 
-      .next-button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 22px rgba(102, 125, 255, 0.34);
+      /* ===== コンテンツ選択カード ===== */
+      .contents-section { padding: clamp(30px, 6vw, 60px) 0 20px; }
+      .contents-section h2 {
+        text-align: center;
+        font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+        margin: 0 0 8px;
       }
+      .contents-section .sub {
+        text-align: center;
+        color: var(--text-dim);
+        margin: 0 0 42px;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: clamp(16px, 3vw, 28px);
+      }
+      .content-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 30px 26px 28px;
+        text-decoration: none;
+        color: var(--text);
+        overflow: hidden;
+        transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+      }
+      .content-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: rgba(255, 255, 255, 0.28);
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+      }
+      .content-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 0%, var(--card-accent) 0%, transparent 55%);
+        opacity: 0.16;
+        transition: opacity 0.35s ease;
+      }
+      .content-card:hover::before { opacity: 0.34; }
+      .content-card .icon {
+        width: 62px;
+        height: 62px;
+        display: grid;
+        place-items: center;
+        font-size: 1.8rem;
+        border-radius: 18px;
+        background: color-mix(in srgb, var(--card-accent) 22%, transparent);
+        border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent);
+      }
+      .content-card h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        letter-spacing: 0.12em;
+      }
+      .content-card p {
+        margin: 0;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.8;
+        flex: 1;
+      }
+      .content-card .go {
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        color: var(--card-accent);
+        transition: transform 0.3s ease;
+      }
+      .content-card:hover .go { transform: translateX(6px); }
+      .card-comic { --card-accent: var(--accent-comic); }
+      .card-game  { --card-accent: var(--accent-game); }
+      .card-movie { --card-accent: var(--accent-movie); }
+      .card-music { --card-accent: var(--accent-music); }
 
-      .next-button:active {
-        transform: translateY(0);
+      /* ===== about ===== */
+      .about {
+        margin-top: clamp(50px, 9vw, 100px);
+        padding: clamp(28px, 5vw, 48px);
+        text-align: center;
       }
+      .about h2 { margin: 0 0 14px; font-size: clamp(1.3rem, 4vw, 1.8rem); }
+      .about p { margin: 0 auto; max-width: 42em; color: var(--text-dim); line-height: 2; }
     </style>
   </head>
   <body>
-    <main class="card">
-      <h1>ようこそ！</h1>
-      <img
-        class="hero-image"
-        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' viewBox='0 0 800 500'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffe1f1'/%3E%3Cstop offset='1' stop-color='%23d7efff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='500' rx='40' fill='url(%23bg)'/%3E%3Ccircle cx='180' cy='150' r='70' fill='%23ffffff' fill-opacity='0.75'/%3E%3Ccircle cx='560' cy='300' r='90' fill='%23ffffff' fill-opacity='0.55'/%3E%3Cpath d='M90 360C190 280 290 280 390 360C490 440 590 440 690 360' fill='none' stroke='%238b79d8' stroke-opacity='0.55' stroke-width='14' stroke-linecap='round'/%3E%3Ctext x='400' y='258' text-anchor='middle' font-size='56' font-family='sans-serif' fill='%235f4ea5'%3Eゆったり%3C/text%3E%3C/svg%3E"
-        alt="やさしい色合いのイラスト"
-      />
-      <p>
-        ここは、ゆったりとした気持ちで見られるシンプルなページです。<br />
-        これから少しずつ、楽しいコンテンツを増やしていきます。
-      </p>
-      <button class="next-button" type="button">つぎへ</button>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">YUINA</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html">COMIC</a>
+        <a href="game.html">GAME</a>
+        <a href="movie.html">MOVIE</a>
+        <a href="music.html">MUSIC</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ヒーロー -->
+      <section class="hero container">
+        <div>
+          <p class="eyebrow">Official Site</p>
+          <h1 class="gradient-text">YUINA</h1>
+          <p class="lead">
+            ようこそ、ゆいなの世界へ。<br />
+            コミック、ゲーム、ムービー、ミュージック——<br class="sp-only" />
+            4つのコンテンツからお好きなものをお選びください。
+          </p>
+          <div class="cta">
+            <a class="btn" href="#contents">コンテンツを見る</a>
+          </div>
+          <div class="scroll-hint" aria-hidden="true">SCROLL ▼</div>
+        </div>
+      </section>
+
+      <!-- コンテンツ選択 -->
+      <section id="contents" class="contents-section container">
+        <h2 class="reveal">CONTENTS</h2>
+        <p class="sub reveal">4つの世界から、今日の気分で選んでね</p>
+        <div class="card-grid">
+          <a class="content-card glass card-comic reveal" href="comic.html">
+            <span class="icon" aria-hidden="true">📖</span>
+            <h3>COMIC</h3>
+            <p>ゆいなの日常を描いたオリジナルコミック。ページをめくって物語の世界へ。</p>
+            <span class="go">READ →</span>
+          </a>
+          <a class="content-card glass card-game reveal" href="game.html">
+            <span class="icon" aria-hidden="true">🎮</span>
+            <h3>GAME</h3>
+            <p>ブラウザですぐ遊べるミニゲーム。星をキャッチしてハイスコアを目指そう。</p>
+            <span class="go">PLAY →</span>
+          </a>
+          <a class="content-card glass card-movie reveal" href="movie.html">
+            <span class="icon" aria-hidden="true">🎬</span>
+            <h3>MOVIE</h3>
+            <p>ゆいなのオリジナルムービー。映像で楽しむもうひとつの物語。</p>
+            <span class="go">WATCH →</span>
+          </a>
+          <a class="content-card glass card-music reveal" href="music.html">
+            <span class="icon" aria-hidden="true">🎵</span>
+            <h3>MUSIC</h3>
+            <p>SUNO AIで制作したオリジナル楽曲コレクション。お気に入りの一曲を見つけて。</p>
+            <span class="go">LISTEN →</span>
+          </a>
+        </div>
+
+        <!-- about -->
+        <div class="about glass reveal">
+          <h2>ABOUT</h2>
+          <p>
+            このサイトは、ゆいなのクリエイティブ作品を集めたポータルサイトです。<br />
+            BGMは右下のボタンでいつでもオン・オフできます。音はゆっくりフェードインするので安心してお楽しみください。
+          </p>
+        </div>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with ♥</p>
+    </footer>
+
+    <script src="js/bgm.js"></script>
+    <script src="js/reveal.js"></script>
   </body>
 </html>
