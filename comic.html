@@ -12,16 +12,22 @@
         padding: clamp(14px, 3vw, 24px);
         text-align: center;
       }
+      .episode-title {
+        margin: 0 0 14px;
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #ff5f9e;
+      }
       .comic-page {
         width: 100%;
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 2 / 3;
         border-radius: 14px;
         overflow: hidden;
         background: #fff;
         display: grid;
         place-items: center;
       }
-      .comic-page img, .comic-page svg {
+      .comic-page img {
         width: 100%;
         height: 100%;
         object-fit: contain;
@@ -34,8 +40,36 @@
         align-items: center;
         gap: 18px;
       }
-      .pager .page-num { color: var(--text-dim); font-weight: 700; letter-spacing: 0.1em; }
-      .drop-note { margin: 26px auto 0; width: min(100%, 640px); }
+      .pager .page-num { color: var(--text-dim); font-weight: 900; letter-spacing: 0.1em; }
+      .episode-list {
+        margin: 30px auto 0;
+        width: min(100%, 640px);
+        padding: 20px 24px;
+      }
+      .episode-list h2 { margin: 0 0 12px; font-size: 1.1rem; font-weight: 900; text-align: center; }
+      .episode-list ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 6px;
+      }
+      .episode-list button {
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text);
+        background: #fff;
+        border: 2px solid #ffe3ef;
+        border-radius: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+      .episode-list button:hover { transform: translateX(6px); border-color: #ff9ecb; background: #fff0f6; }
+      .episode-list button.current { background: linear-gradient(135deg, #ffd6e8, #ffe9f3); border-color: #ff9ecb; }
     </style>
   </head>
   <body>
@@ -61,87 +95,93 @@
       <section class="page-hero">
         <p class="eyebrow">Comic</p>
         <h1><span class="gradient-text">ゆいなコミック</span></h1>
-        <p class="lead">ゆいなのまいにちをえがいたオリジナルコミック。ボタンでページをめくってね📖</p>
+        <p class="lead">ゆいなのまいにちをえがいたオリジナルコミック、全9話！ボタンや矢印キーでページをめくってね📖</p>
       </section>
 
       <section class="comic-viewer glass reveal">
+        <h2 class="episode-title" id="episode-title"></h2>
         <div class="comic-page" id="comic-page"></div>
         <div class="pager">
           <button class="btn ghost" id="prev-btn" type="button">← まえ</button>
-          <span class="page-num"><span id="cur-page">1</span> / <span id="max-page">3</span></span>
+          <span class="page-num"><span id="cur-page">1</span> / <span id="max-page">9</span></span>
           <button class="btn ghost" id="next-btn" type="button">つぎ →</button>
         </div>
       </section>
 
-      <p class="notice drop-note reveal">
-        コミック画像は <code>assets/comic/page1.png</code>、<code>page2.png</code>…
-        の名前で置くと自動的に表示されます。今はサンプルページを表示中です。
-      </p>
+      <section class="episode-list glass reveal">
+        <h2>📚 エピソードいちらん</h2>
+        <ol id="episode-list"></ol>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <p>© 2026 YUINA — Made with ♥</p>
+      <p>© 2026 YUINA — Made with 💖</p>
     </footer>
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
     <script>
       (() => {
-        const PAGE_COUNT = 3;
+        const EPISODES = [
+          { file: "assets/comic/page1.jpg", title: "第1話 テスト勉強編" },
+          { file: "assets/comic/page2.jpg", title: "第2話 はよ寝なさい選手権" },
+          { file: "assets/comic/page3.jpg", title: "第3話 プリン編" },
+          { file: "assets/comic/page4.jpg", title: "第4話 くら寿司バトル編" },
+          { file: "assets/comic/page5.jpg", title: "第5話 お小遣い交渉編" },
+          { file: "assets/comic/page6.jpg", title: "第6話 テスト結果が返ってきた" },
+          { file: "assets/comic/page7.jpg", title: "第7話 ずっと前からおったで" },
+          { file: "assets/comic/page8.jpg", title: "第8話 なんか静かな日" },
+          { file: "assets/comic/page9.jpg", title: "第9話（最終話）ちゃんとおるで" },
+        ];
         const pageEl = document.getElementById("comic-page");
+        const titleEl = document.getElementById("episode-title");
         const curEl = document.getElementById("cur-page");
         const maxEl = document.getElementById("max-page");
         const prevBtn = document.getElementById("prev-btn");
         const nextBtn = document.getElementById("next-btn");
+        const listEl = document.getElementById("episode-list");
         let page = 1;
-        maxEl.textContent = PAGE_COUNT;
+        maxEl.textContent = EPISODES.length;
 
-        // 画像が無いときに表示するサンプルページ（SVG）
-        function placeholderSvg(n) {
-          const colors = ["#ffe1f1", "#e3e9ff", "#e0fff4"];
-          const lines = [
-            ["ある日のゆいな。", "「今日はなにして", "あそぼうかな？」"],
-            ["ゲームをしたり、", "おんがくを聴いたり。", "たのしいことがいっぱい！"],
-            ["「また来てね！」", "つづきは", "COMING SOON…"],
-          ];
-          const texts = lines[n - 1]
-            .map((t, i) => `<text x="300" y="${330 + i * 56}" text-anchor="middle" font-size="34" font-family="sans-serif" fill="#5f4ea5">${t}</text>`)
-            .join("");
-          return `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800">
-              <rect width="600" height="800" fill="${colors[n - 1]}"/>
-              <rect x="24" y="24" width="552" height="752" rx="18" fill="#ffffff"/>
-              <circle cx="300" cy="180" r="90" fill="${colors[n - 1]}"/>
-              <circle cx="265" cy="165" r="10" fill="#5f4ea5"/>
-              <circle cx="335" cy="165" r="10" fill="#5f4ea5"/>
-              <path d="M265 210 Q300 240 335 210" fill="none" stroke="#5f4ea5" stroke-width="8" stroke-linecap="round"/>
-              ${texts}
-              <text x="300" y="740" text-anchor="middle" font-size="22" font-family="sans-serif" fill="#9aa0c3">- ${n} -</text>
-            </svg>`;
-        }
+        // エピソード一覧
+        EPISODES.forEach((ep, i) => {
+          const li = document.createElement("li");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = ep.title;
+          btn.addEventListener("click", () => {
+            page = i + 1;
+            render();
+            document.querySelector(".comic-viewer").scrollIntoView({ behavior: "smooth" });
+          });
+          li.appendChild(btn);
+          listEl.appendChild(li);
+        });
 
         function render() {
+          const ep = EPISODES[page - 1];
           curEl.textContent = page;
+          titleEl.textContent = ep.title;
           prevBtn.disabled = page === 1;
-          nextBtn.disabled = page === PAGE_COUNT;
+          nextBtn.disabled = page === EPISODES.length;
+          listEl.querySelectorAll("button").forEach((b, i) => {
+            b.classList.toggle("current", i === page - 1);
+          });
 
           const img = new Image();
-          img.alt = `コミック ${page}ページ目`;
-          img.src = `assets/comic/page${page}.png`;
+          img.alt = ep.title;
+          img.src = ep.file;
           img.onload = () => {
             pageEl.innerHTML = "";
             pageEl.appendChild(img);
           };
-          img.onerror = () => {
-            pageEl.innerHTML = placeholderSvg(page);
-          };
         }
 
         prevBtn.addEventListener("click", () => { if (page > 1) { page--; render(); } });
-        nextBtn.addEventListener("click", () => { if (page < PAGE_COUNT) { page++; render(); } });
+        nextBtn.addEventListener("click", () => { if (page < EPISODES.length) { page++; render(); } });
         window.addEventListener("keydown", (e) => {
-          if (e.key === "ArrowLeft") prevBtn.click();
-          if (e.key === "ArrowRight") nextBtn.click();
+          if (e.key === "ArrowLeft" && !prevBtn.disabled) prevBtn.click();
+          if (e.key === "ArrowRight" && !nextBtn.disabled) nextBtn.click();
         });
 
         render();
