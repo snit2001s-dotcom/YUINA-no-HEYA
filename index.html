@@ -3,50 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YUINA — Comic / Game / Movie / Music</title>
+    <title>ゆいなのおうち — Comic / Game / Movie / Music</title>
     <meta name="description" content="ゆいなの公式サイト。Comic・Game・Movie・Musicの4つのコンテンツをお楽しみください。" />
     <link rel="stylesheet" href="css/style.css" />
     <style>
       /* ===== LP 専用スタイル ===== */
       .hero {
-        min-height: calc(100svh - 70px);
+        min-height: calc(100svh - 76px);
         display: grid;
         place-items: center;
         text-align: center;
         padding: clamp(40px, 8vw, 80px) 0;
       }
       .hero .eyebrow {
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 0.5em;
-        color: var(--text-dim);
+        font-size: 0.9rem;
+        font-weight: 900;
+        letter-spacing: 0.4em;
+        color: #ffa5cd;
         text-transform: uppercase;
         margin: 0 0 18px;
       }
       .hero h1 {
         margin: 0;
-        font-size: clamp(3rem, 13vw, 7rem);
-        line-height: 1.05;
-        letter-spacing: 0.06em;
+        font-size: clamp(2.6rem, 11vw, 5.6rem);
+        line-height: 1.15;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+      .hero h1 .deco { display: inline-block; animation: bounce 2s ease-in-out infinite; }
+      .hero h1 .deco:last-child { animation-delay: 0.4s; }
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0) rotate(-6deg); }
+        50% { transform: translateY(-12px) rotate(6deg); }
       }
       .hero .lead {
         margin: 26px auto 0;
         max-width: 38em;
         color: var(--text-dim);
         line-height: 2;
+        font-weight: 700;
         font-size: clamp(0.95rem, 2.6vw, 1.1rem);
       }
       .hero .cta {
-        margin-top: 40px;
+        margin-top: 38px;
         display: flex;
         gap: 14px;
         justify-content: center;
         flex-wrap: wrap;
       }
       .scroll-hint {
-        margin-top: 60px;
-        color: var(--text-dim);
-        font-size: 0.75rem;
+        margin-top: 54px;
+        color: #ffa5cd;
+        font-weight: 900;
+        font-size: 0.8rem;
         letter-spacing: 0.3em;
         animation: bob 2.2s ease-in-out infinite;
       }
@@ -59,12 +68,14 @@
       .contents-section { padding: clamp(30px, 6vw, 60px) 0 20px; }
       .contents-section h2 {
         text-align: center;
-        font-size: clamp(1.5rem, 4.5vw, 2.2rem);
+        font-size: clamp(1.6rem, 4.5vw, 2.3rem);
+        font-weight: 900;
         margin: 0 0 8px;
       }
       .contents-section .sub {
         text-align: center;
         color: var(--text-dim);
+        font-weight: 700;
         margin: 0 0 42px;
       }
       .card-grid {
@@ -81,36 +92,39 @@
         text-decoration: none;
         color: var(--text);
         overflow: hidden;
-        transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
       }
       .content-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        border-color: rgba(255, 255, 255, 0.28);
-        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+        transform: translateY(-10px) rotate(-1.5deg) scale(1.03);
+        box-shadow: 0 20px 44px color-mix(in srgb, var(--card-accent) 35%, transparent), 0 0 0 1px var(--card-border);
       }
       .content-card::before {
         content: "";
         position: absolute;
         inset: 0;
         background: radial-gradient(circle at 30% 0%, var(--card-accent) 0%, transparent 55%);
-        opacity: 0.16;
+        opacity: 0.12;
         transition: opacity 0.35s ease;
       }
-      .content-card:hover::before { opacity: 0.34; }
+      .content-card:hover::before { opacity: 0.26; }
       .content-card .icon {
-        width: 62px;
-        height: 62px;
+        width: 66px;
+        height: 66px;
         display: grid;
         place-items: center;
-        font-size: 1.8rem;
-        border-radius: 18px;
-        background: color-mix(in srgb, var(--card-accent) 22%, transparent);
-        border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent);
+        font-size: 2rem;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--card-accent) 18%, #fff);
+        border: 3px solid color-mix(in srgb, var(--card-accent) 45%, #fff);
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
+      .content-card:hover .icon { transform: scale(1.15) rotate(10deg); }
       .content-card h3 {
         margin: 0;
         font-size: 1.35rem;
+        font-weight: 900;
         letter-spacing: 0.12em;
+        color: color-mix(in srgb, var(--card-accent) 75%, #5c4a63);
       }
       .content-card p {
         margin: 0;
@@ -120,13 +134,13 @@
         flex: 1;
       }
       .content-card .go {
-        font-weight: 700;
-        font-size: 0.85rem;
+        font-weight: 900;
+        font-size: 0.9rem;
         letter-spacing: 0.1em;
         color: var(--card-accent);
         transition: transform 0.3s ease;
       }
-      .content-card:hover .go { transform: translateX(6px); }
+      .content-card:hover .go { transform: translateX(8px); }
       .card-comic { --card-accent: var(--accent-comic); }
       .card-game  { --card-accent: var(--accent-game); }
       .card-movie { --card-accent: var(--accent-movie); }
@@ -138,15 +152,25 @@
         padding: clamp(28px, 5vw, 48px);
         text-align: center;
       }
-      .about h2 { margin: 0 0 14px; font-size: clamp(1.3rem, 4vw, 1.8rem); }
-      .about p { margin: 0 auto; max-width: 42em; color: var(--text-dim); line-height: 2; }
+      .about h2 { margin: 0 0 14px; font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 900; }
+      .about p { margin: 0 auto; max-width: 42em; color: var(--text-dim); line-height: 2; font-weight: 700; }
     </style>
   </head>
   <body>
     <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+    <div class="floaties" aria-hidden="true">
+      <span style="top: 12%; left: 6%">🎀</span>
+      <span style="top: 24%; right: 8%">⭐</span>
+      <span style="top: 55%; left: 4%">🌈</span>
+      <span style="top: 70%; right: 5%">💖</span>
+      <span style="top: 40%; left: 12%">🍭</span>
+      <span style="top: 85%; left: 40%">✨</span>
+      <span style="top: 8%; left: 45%">🌸</span>
+      <span style="top: 60%; right: 14%">🧁</span>
+    </div>
 
     <header class="site-header">
-      <a class="brand" href="index.html">YUINA</a>
+      <a class="brand" href="index.html">🎀 YUINA</a>
       <nav class="site-nav" aria-label="メインナビゲーション">
         <a href="comic.html">COMIC</a>
         <a href="game.html">GAME</a>
@@ -159,15 +183,15 @@
       <!-- ヒーロー -->
       <section class="hero container">
         <div>
-          <p class="eyebrow">Official Site</p>
-          <h1 class="gradient-text">YUINA</h1>
+          <p class="eyebrow">Welcome!</p>
+          <h1><span class="deco">🌈</span> <span class="gradient-text">ゆいなのおうち</span> <span class="deco">🎀</span></h1>
           <p class="lead">
-            ようこそ、ゆいなの世界へ。<br />
-            コミック、ゲーム、ムービー、ミュージック——<br class="sp-only" />
-            4つのコンテンツからお好きなものをお選びください。
+            ようこそ、ゆいなのせかいへ！<br />
+            コミック・ゲーム・ムービー・ミュージック、<br />
+            すきなあそびをえらんでね♪
           </p>
           <div class="cta">
-            <a class="btn" href="#contents">コンテンツを見る</a>
+            <a class="btn" href="#contents">🍬 あそびにいく！</a>
           </div>
           <div class="scroll-hint" aria-hidden="true">SCROLL ▼</div>
         </div>
@@ -175,48 +199,48 @@
 
       <!-- コンテンツ選択 -->
       <section id="contents" class="contents-section container">
-        <h2 class="reveal">CONTENTS</h2>
-        <p class="sub reveal">4つの世界から、今日の気分で選んでね</p>
+        <h2 class="reveal">✨ CONTENTS ✨</h2>
+        <p class="sub reveal">4つのせかいから、きょうのきぶんでえらんでね</p>
         <div class="card-grid">
           <a class="content-card glass card-comic reveal" href="comic.html">
             <span class="icon" aria-hidden="true">📖</span>
             <h3>COMIC</h3>
-            <p>ゆいなの日常を描いたオリジナルコミック。ページをめくって物語の世界へ。</p>
-            <span class="go">READ →</span>
+            <p>ゆいなのまいにちをえがいたオリジナルコミック。ページをめくって物語のせかいへ！</p>
+            <span class="go">よむ →</span>
           </a>
           <a class="content-card glass card-game reveal" href="game.html">
             <span class="icon" aria-hidden="true">🎮</span>
             <h3>GAME</h3>
-            <p>ブラウザですぐ遊べるミニゲーム。星をキャッチしてハイスコアを目指そう。</p>
-            <span class="go">PLAY →</span>
+            <p>ブラウザですぐあそべるミニゲーム。星をキャッチしてハイスコアをめざそう！</p>
+            <span class="go">あそぶ →</span>
           </a>
           <a class="content-card glass card-movie reveal" href="movie.html">
             <span class="icon" aria-hidden="true">🎬</span>
             <h3>MOVIE</h3>
-            <p>ゆいなのオリジナルムービー。映像で楽しむもうひとつの物語。</p>
-            <span class="go">WATCH →</span>
+            <p>ゆいなのオリジナルムービー。えいぞうでたのしむ、もうひとつの物語。</p>
+            <span class="go">みる →</span>
           </a>
           <a class="content-card glass card-music reveal" href="music.html">
             <span class="icon" aria-hidden="true">🎵</span>
             <h3>MUSIC</h3>
-            <p>SUNO AIで制作したオリジナル楽曲コレクション。お気に入りの一曲を見つけて。</p>
-            <span class="go">LISTEN →</span>
+            <p>SUNO AIでつくったオリジナルソング。おきにいりの一曲をみつけてね♪</p>
+            <span class="go">きく →</span>
           </a>
         </div>
 
         <!-- about -->
         <div class="about glass reveal">
-          <h2>ABOUT</h2>
+          <h2>🏠 ABOUT</h2>
           <p>
-            このサイトは、ゆいなのクリエイティブ作品を集めたポータルサイトです。<br />
-            BGMは右下のボタンでいつでもオン・オフできます。音はゆっくりフェードインするので安心してお楽しみください。
+            このサイトは、ゆいなのさくひんをあつめたポータルサイトです。<br />
+            BGMは右下の♪ボタンでいつでもオン・オフできるよ。音はゆっくりはじまるから、びっくりしないでね！
           </p>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>© 2026 YUINA — Made with ♥</p>
+      <p>© 2026 YUINA — Made with 💖</p>
     </footer>
 
     <script src="js/bgm.js"></script>
