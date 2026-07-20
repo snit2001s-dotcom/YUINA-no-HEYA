@@ -1,6 +1,6 @@
 {
   "bgm": "assets/audio/bgm.mp3",
-  "characterImage": "",
+  "characterImage": "assets/comic/mrsrbo4w_キャラクター紹介.png",
   "tracks": [
     {
       "file": "assets/audio/bgm.mp3",
@@ -101,10 +101,6 @@
     {
       "file": "assets/comic/page9.jpg",
       "title": "第9話（最終話）ちゃんとおるで"
-    },
-    {
-      "file": "assets/comic/mrsrbo4w_キャラクター紹介.png",
-      "title": "キャラクター紹介"
     }
   ]
 }
