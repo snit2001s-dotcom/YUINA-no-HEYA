@@ -158,7 +158,7 @@
         let EPISODES = FALLBACK_EPISODES;
         let characterImage = "assets/comic/characters.jpg";
         try {
-          const res = await fetch("assets/media.json");
+          const res = await fetch("assets/media.json?t=" + Date.now(), { cache: "no-store" });
           if (res.ok) {
             const m = await res.json();
             if (Array.isArray(m.comics) && m.comics.length) EPISODES = m.comics;

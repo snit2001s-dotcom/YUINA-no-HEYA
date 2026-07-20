@@ -120,7 +120,7 @@
           wrap.innerHTML = "";
           let videos = FALLBACK_VIDEOS;
           try {
-            const res = await fetch("assets/media.json");
+            const res = await fetch("assets/media.json?t=" + Date.now(), { cache: "no-store" });
             if (res.ok) videos = (await res.json()).videos || FALLBACK_VIDEOS;
           } catch {}
           videos.forEach((v) => {

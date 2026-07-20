@@ -52,7 +52,7 @@
   // media.json に bgm の指定があればそちらを優先（曲の差し替えがJSON1行で済む）
   async function resolveSrc() {
     try {
-      const res = await fetch("assets/media.json");
+      const res = await fetch("assets/media.json?t=" + Date.now(), { cache: "no-store" });
       if (res.ok) {
         const m = await res.json();
         if (m.bgm) return m.bgm;

@@ -133,7 +133,7 @@
           wrap.innerHTML = "";
           let tracks = FALLBACK_TRACKS;
           try {
-            const res = await fetch("assets/media.json");
+            const res = await fetch("assets/media.json?t=" + Date.now(), { cache: "no-store" });
             if (res.ok) tracks = (await res.json()).tracks || FALLBACK_TRACKS;
           } catch {}
           tracks.forEach((t, i) => {
