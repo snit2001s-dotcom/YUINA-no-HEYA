@@ -1,0 +1,10 @@
+{
+  "bgm": "assets/audio/bgm.mp3",
+  "tracks": [
+    { "file": "assets/audio/bgm.mp3", "title": "ユイナへのメロディー V2.0", "emoji": "🌸" },
+    { "file": "assets/audio/track2.mp3", "title": "小さな勇者 V1.0", "emoji": "⚔️" }
+  ],
+  "videos": [
+    { "file": "assets/video/movie.mp4", "title": "ゆいなAIムービー", "emoji": "🎬" }
+  ]
+}

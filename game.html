@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GAME — YUINA</title>
+    <title>ゆいなのへや — GAME</title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
       .game-select {
@@ -40,6 +40,10 @@
       .game-card h2 { margin: 0 0 6px; font-size: 1.3rem; font-weight: 900; color: #7c5fd3; }
       .game-card .desc { margin: 0 0 10px; color: var(--text-dim); font-size: 0.92rem; line-height: 1.8; }
       .game-card .go { font-weight: 900; color: var(--accent-game); }
+      @media (max-width: 640px) {
+        .game-card { grid-template-columns: 1fr; text-align: center; justify-items: center; padding: 20px 16px; }
+        .game-hud { font-size: 0.85rem; }
+      }
       .game-wrap {
         margin: 30px auto 0;
         width: min(100%, 720px);
@@ -95,7 +99,7 @@
     </div>
 
     <header class="site-header">
-      <a class="brand" href="index.html">🎀 YUINA</a>
+      <a class="brand" href="index.html">🎀 ゆいなのへや</a>
       <nav class="site-nav" aria-label="メインナビゲーション">
         <a href="comic.html">COMIC</a>
         <a href="game.html" aria-current="page">GAME</a>

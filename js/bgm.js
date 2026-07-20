@@ -49,10 +49,22 @@
     g.linearRampToValueAtTime(value, ctx.currentTime + seconds);
   }
 
-  // --- bgm.mp3 があればループ再生、無ければ生成アンビエントにフォールバック ---
+  // media.json に bgm の指定があればそちらを優先（曲の差し替えがJSON1行で済む）
+  async function resolveSrc() {
+    try {
+      const res = await fetch("assets/media.json");
+      if (res.ok) {
+        const m = await res.json();
+        if (m.bgm) return m.bgm;
+      }
+    } catch {}
+    return BGM_SRC;
+  }
+
+  // --- BGMファイルがあればループ再生、無ければ生成アンビエントにフォールバック ---
   async function startSource() {
     try {
-      const res = await fetch(BGM_SRC);
+      const res = await fetch(await resolveSrc());
       if (!res.ok) throw new Error("bgm file not found");
       const buf = await ctx.decodeAudioData(await res.arrayBuffer());
       const src = ctx.createBufferSource();

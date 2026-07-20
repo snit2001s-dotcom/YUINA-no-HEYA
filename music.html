@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MUSIC — YUINA</title>
+    <title>ゆいなのへや — MUSIC</title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
       .tracks {
@@ -20,7 +20,7 @@
         padding: 18px 20px;
         transition: transform 0.25s ease, border-color 0.25s ease;
       }
-      .track:hover { transform: translateX(6px); border-color: rgba(255, 196, 107, 0.45); }
+      .track:hover { transform: translateX(6px); }
       .track .art {
         width: 56px;
         height: 56px;
@@ -28,18 +28,18 @@
         display: grid;
         place-items: center;
         font-size: 1.5rem;
-        background: linear-gradient(135deg, rgba(255, 196, 107, 0.25), rgba(255, 111, 174, 0.25));
-        border: 1px solid rgba(255, 196, 107, 0.35);
+        background: linear-gradient(135deg, rgba(255, 180, 84, 0.25), rgba(255, 127, 181, 0.25));
+        border: 3px solid #fff;
       }
-      .track h3 { margin: 0 0 2px; font-size: 1.05rem; }
-      .track .artist { margin: 0 0 10px; color: var(--text-dim); font-size: 0.8rem; }
+      .track h3 { margin: 0 0 2px; font-size: 1.05rem; font-weight: 900; }
+      .track .artist { margin: 0 0 10px; color: var(--text-dim); font-size: 0.8rem; font-weight: 700; }
       .track audio { width: 100%; height: 36px; }
-      .track .missing {
-        color: var(--text-dim);
-        font-size: 0.85rem;
-        font-style: italic;
-      }
+      .track .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
       .drop-note { margin: 30px auto 0; width: min(100%, 760px); }
+      @media (max-width: 640px) {
+        .track { grid-template-columns: 44px 1fr; padding: 14px; }
+        .track .art { width: 44px; height: 44px; font-size: 1.2rem; }
+      }
     </style>
   </head>
   <body>
@@ -52,7 +52,7 @@
     </div>
 
     <header class="site-header">
-      <a class="brand" href="index.html">🎀 YUINA</a>
+      <a class="brand" href="index.html">🎀 ゆいなのへや</a>
       <nav class="site-nav" aria-label="メインナビゲーション">
         <a href="comic.html">COMIC</a>
         <a href="game.html">GAME</a>
@@ -70,63 +70,94 @@
 
       <section class="tracks" id="tracks"></section>
 
+      <div class="add-bar">
+        <button class="btn" id="add-track-btn" type="button">＋ きょくをついか</button>
+      </div>
+
       <p class="notice drop-note reveal">
-        「ユイナへのメロディー」はトップページのBGMにもなっているよ🎶
-        あたらしい曲は <code>assets/audio/</code> にmp3を置いて、このページ内の <code>TRACKS</code> リストに追加してね。
+        「＋きょくをついか」でえらんだ曲は<strong>この端末だけ</strong>で再生できます（ブラウザに保存されます）。<br />
+        みんなに公開したいときは、mp3を <code>assets/audio/</code> にアップロードして
+        <code>assets/media.json</code> の <code>tracks</code> に1行追加してね。
       </p>
     </main>
 
     <footer class="site-footer">
-      <p>© 2026 YUINA — Made with ♥</p>
+      <p>© 2026 YUINA — Made with 💖</p>
     </footer>
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
+    <script src="js/media-store.js"></script>
     <script>
-      // ===== 楽曲リスト（曲名はここを編集） =====
-      const TRACKS = [
-        { file: "assets/audio/bgm.mp3", title: "ユイナへのメロディー V2.0", emoji: "🌸" },
-        { file: "assets/audio/track2.mp3", title: "小さな勇者 V1.0", emoji: "⚔️" },
-      ];
-
       (() => {
+        // media.json が読めないときの予備リスト
+        const FALLBACK_TRACKS = [
+          { file: "assets/audio/bgm.mp3", title: "ユイナへのメロディー V2.0", emoji: "🌸" },
+          { file: "assets/audio/track2.mp3", title: "小さな勇者 V1.0", emoji: "⚔️" },
+        ];
         const wrap = document.getElementById("tracks");
 
-        TRACKS.forEach((t, i) => {
+        function makeTrack({ title, emoji, src, isLocal, id, index }) {
           const el = document.createElement("article");
-          el.className = "track glass reveal";
+          el.className = "track glass";
           el.innerHTML = `
-            <div class="art" aria-hidden="true">${t.emoji}</div>
+            <div class="art" aria-hidden="true">${emoji || "🎵"}</div>
             <div>
-              <h3>${t.title}</h3>
-              <p class="artist">YUINA × SUNO AI — Track ${String(i + 1).padStart(2, "0")}</p>
-              <div class="player-slot"></div>
+              <div class="head">
+                <h3>${title}${isLocal ? '<span class="local-badge">この端末のみ</span>' : ""}</h3>
+                ${isLocal ? '<button class="remove-btn" type="button">けす</button>' : ""}
+              </div>
+              <p class="artist">YUINA × SUNO AI${index ? ` — Track ${String(index).padStart(2, "0")}` : ""}</p>
+              <audio controls preload="metadata"></audio>
             </div>`;
-          wrap.appendChild(el);
-
-          const slot = el.querySelector(".player-slot");
-          const audio = document.createElement("audio");
-          audio.controls = true;
-          audio.preload = "metadata";
-          audio.src = t.file;
-          audio.addEventListener("error", () => {
-            slot.innerHTML = `<span class="missing">🎵 COMING SOON — 楽曲ファイルを準備中です</span>`;
-          });
-          // 曲を再生したらBGMを止める＆他の曲も止める
+          const audio = el.querySelector("audio");
+          audio.src = src;
           audio.addEventListener("play", () => {
-            document.querySelectorAll("audio").forEach((a) => {
-              if (a !== audio) a.pause();
-            });
+            document.querySelectorAll("audio").forEach((a) => { if (a !== audio) a.pause(); });
             const btn = document.querySelector(".bgm-toggle");
             if (btn && btn.classList.contains("is-playing")) btn.click();
           });
-          slot.appendChild(audio);
-        });
+          if (isLocal) {
+            el.querySelector(".remove-btn").addEventListener("click", async () => {
+              if (confirm(`「${title}」をけしてもいい？`)) {
+                await MediaStore.remove(id);
+                render();
+              }
+            });
+          }
+          return el;
+        }
 
-        // 動的追加後にrevealを再スキャン
-        document.querySelectorAll(".track.reveal").forEach((el, i) => {
-          setTimeout(() => el.classList.add("is-visible"), 120 * i);
-        });
+        async function render() {
+          wrap.innerHTML = "";
+          let tracks = FALLBACK_TRACKS;
+          try {
+            const res = await fetch("assets/media.json");
+            if (res.ok) tracks = (await res.json()).tracks || FALLBACK_TRACKS;
+          } catch {}
+          tracks.forEach((t, i) => {
+            wrap.appendChild(makeTrack({ title: t.title, emoji: t.emoji, src: t.file, index: i + 1 }));
+          });
+          try {
+            const locals = await MediaStore.list("music");
+            locals.forEach((item) => {
+              wrap.appendChild(makeTrack({
+                title: item.title,
+                emoji: "🏠",
+                src: URL.createObjectURL(item.blob),
+                isLocal: true,
+                id: item.id,
+              }));
+            });
+          } catch {}
+          wrap.querySelectorAll(".track").forEach((el, i) => {
+            el.classList.add("reveal");
+            setTimeout(() => el.classList.add("is-visible"), 100 * i);
+          });
+        }
+
+        MediaStore.setupAddButton(document.getElementById("add-track-btn"), "music", "audio/*", render);
+        render();
       })();
     </script>
   </body>

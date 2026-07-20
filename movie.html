@@ -3,45 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MOVIE — YUINA</title>
+    <title>ゆいなのへや — MOVIE</title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
-      .player-wrap {
+      .videos {
         margin: 30px auto 0;
         width: min(100%, 860px);
+        display: grid;
+        gap: 20px;
+      }
+      .video-item {
         padding: clamp(12px, 2.5vw, 22px);
       }
-      .player-wrap video {
+      .video-item video {
         display: block;
         width: 100%;
         aspect-ratio: 16 / 9;
         border-radius: 14px;
         background: #000;
       }
-      .video-fallback {
-        display: none;
-        aspect-ratio: 16 / 9;
-        border-radius: 14px;
-        place-items: center;
-        text-align: center;
-        padding: 24px;
-        background:
-          radial-gradient(circle at 30% 30%, rgba(95, 201, 248, 0.25), transparent 60%),
-          radial-gradient(circle at 70% 70%, rgba(255, 138, 197, 0.25), transparent 60%),
-          #fef4ff;
-        color: var(--text-dim);
-        font-weight: 700;
-        line-height: 2;
+      .video-item .head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
       }
-      .video-fallback .clap { font-size: 3rem; display: block; margin-bottom: 10px; }
-      .movie-meta {
-        margin: 26px auto 0;
-        width: min(100%, 860px);
-        padding: 22px 26px;
-        color: var(--text-dim);
-        line-height: 1.9;
-      }
-      .movie-meta h2 { margin: 0 0 8px; color: var(--text); font-size: 1.2rem; }
+      .video-item h2 { margin: 0; font-size: 1.1rem; font-weight: 900; color: #3f9cc9; }
       .drop-note { margin: 26px auto 0; width: min(100%, 860px); }
     </style>
   </head>
@@ -55,7 +44,7 @@
     </div>
 
     <header class="site-header">
-      <a class="brand" href="index.html">🎀 YUINA</a>
+      <a class="brand" href="index.html">🎀 ゆいなのへや</a>
       <nav class="site-nav" aria-label="メインナビゲーション">
         <a href="comic.html">COMIC</a>
         <a href="game.html">GAME</a>
@@ -71,56 +60,91 @@
         <p class="lead">えいぞうでたのしむ、もうひとつのゆいなのせかい🍿</p>
       </section>
 
-      <section class="player-wrap glass reveal">
-        <video id="main-video" controls preload="metadata" playsinline>
-          <source src="assets/video/movie.mp4" type="video/mp4" />
-          お使いのブラウザは動画再生に対応していません。
-        </video>
-        <div class="video-fallback" id="video-fallback">
-          <div>
-            <span class="clap" aria-hidden="true">🎬</span>
-            ムービーは <strong>COMING SOON</strong><br />
-            公開までもう少しお待ちください！
-          </div>
-        </div>
-      </section>
+      <section class="videos" id="videos"></section>
 
-      <section class="movie-meta glass reveal">
-        <h2>作品について</h2>
-        <p>
-          AIで制作したゆいなのオリジナルムービーです。さいせいボタンをおしてみてね！
-          動画をさいせいすると、サイトのBGMはじゃまにならないように自動でとまるよ。
-        </p>
-      </section>
+      <div class="add-bar">
+        <button class="btn" id="add-video-btn" type="button">＋ どうがをついか</button>
+      </div>
 
       <p class="notice drop-note reveal">
-        あたらしい動画に差し替えるときは <code>assets/video/movie.mp4</code> を置きかえてね。
+        「＋どうがをついか」でえらんだ動画は<strong>この端末だけ</strong>で再生できます（ブラウザに保存されます）。<br />
+        みんなに公開したいときは、mp4を <code>assets/video/</code> にアップロードして
+        <code>assets/media.json</code> の <code>videos</code> に1行追加してね。
       </p>
     </main>
 
     <footer class="site-footer">
-      <p>© 2026 YUINA — Made with ♥</p>
+      <p>© 2026 YUINA — Made with 💖</p>
     </footer>
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
+    <script src="js/media-store.js"></script>
     <script>
-      // 動画ファイルが無い場合は COMING SOON 表示に切り替え
       (() => {
-        const video = document.getElementById("main-video");
-        const fallback = document.getElementById("video-fallback");
-        video.addEventListener("error", showFallback, true);
-        const src = video.querySelector("source");
-        src.addEventListener("error", showFallback);
-        function showFallback() {
-          video.style.display = "none";
-          fallback.style.display = "grid";
+        const FALLBACK_VIDEOS = [
+          { file: "assets/video/movie.mp4", title: "ゆいなAIムービー", emoji: "🎬" },
+        ];
+        const wrap = document.getElementById("videos");
+
+        function makeVideo({ title, emoji, src, isLocal, id }) {
+          const el = document.createElement("article");
+          el.className = "video-item glass";
+          el.innerHTML = `
+            <div class="head">
+              <h2>${emoji || "🎬"} ${title}${isLocal ? '<span class="local-badge">この端末のみ</span>' : ""}</h2>
+              ${isLocal ? '<button class="remove-btn" type="button">けす</button>' : ""}
+            </div>
+            <video controls preload="metadata" playsinline></video>`;
+          const video = el.querySelector("video");
+          video.src = src;
+          // 動画をさいせいしたらサイトBGMと他の動画をとめる
+          video.addEventListener("play", () => {
+            document.querySelectorAll("video, audio").forEach((m) => { if (m !== video) m.pause(); });
+            const btn = document.querySelector(".bgm-toggle");
+            if (btn && btn.classList.contains("is-playing")) btn.click();
+          });
+          if (isLocal) {
+            el.querySelector(".remove-btn").addEventListener("click", async () => {
+              if (confirm(`「${title}」をけしてもいい？`)) {
+                await MediaStore.remove(id);
+                render();
+              }
+            });
+          }
+          return el;
         }
-        // 動画再生中はBGMをオフにする案内（bgm.jsのトグルと連動）
-        video.addEventListener("play", () => {
-          const btn = document.querySelector(".bgm-toggle");
-          if (btn && btn.classList.contains("is-playing")) btn.click();
-        });
+
+        async function render() {
+          wrap.innerHTML = "";
+          let videos = FALLBACK_VIDEOS;
+          try {
+            const res = await fetch("assets/media.json");
+            if (res.ok) videos = (await res.json()).videos || FALLBACK_VIDEOS;
+          } catch {}
+          videos.forEach((v) => {
+            wrap.appendChild(makeVideo({ title: v.title, emoji: v.emoji, src: v.file }));
+          });
+          try {
+            const locals = await MediaStore.list("video");
+            locals.forEach((item) => {
+              wrap.appendChild(makeVideo({
+                title: item.title,
+                emoji: "🏠",
+                src: URL.createObjectURL(item.blob),
+                isLocal: true,
+                id: item.id,
+              }));
+            });
+          } catch {}
+          wrap.querySelectorAll(".video-item").forEach((el, i) => {
+            el.classList.add("reveal");
+            setTimeout(() => el.classList.add("is-visible"), 100 * i);
+          });
+        }
+
+        MediaStore.setupAddButton(document.getElementById("add-video-btn"), "video", "video/mp4,video/*", render);
+        render();
       })();
     </script>
   </body>

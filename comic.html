@@ -3,9 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMIC — YUINA</title>
+    <title>ゆいなのへや — COMIC</title>
     <link rel="stylesheet" href="css/style.css" />
     <style>
+      .character-intro {
+        margin: 10px auto 0;
+        width: min(100%, 640px);
+        padding: clamp(14px, 3vw, 24px);
+        text-align: center;
+      }
+      .character-intro h2 { margin: 0 0 14px; font-size: 1.15rem; font-weight: 900; }
+      .character-intro img {
+        width: 100%;
+        height: auto;
+        border-radius: 14px;
+        display: block;
+      }
       .comic-viewer {
         margin: 30px auto 0;
         width: min(100%, 640px);
@@ -82,7 +95,7 @@
     </div>
 
     <header class="site-header">
-      <a class="brand" href="index.html">🎀 YUINA</a>
+      <a class="brand" href="index.html">🎀 ゆいなのへや</a>
       <nav class="site-nav" aria-label="メインナビゲーション">
         <a href="comic.html" aria-current="page">COMIC</a>
         <a href="game.html">GAME</a>
@@ -96,6 +109,12 @@
         <p class="eyebrow">Comic</p>
         <h1><span class="gradient-text">ゆいなコミック</span></h1>
         <p class="lead">ゆいなのまいにちをえがいたオリジナルコミック、全9話！ボタンや矢印キーでページをめくってね📖</p>
+      </section>
+
+      <!-- キャラクター紹介（assets/comic/characters.jpg があれば表示） -->
+      <section class="character-intro glass reveal" id="character-intro" hidden>
+        <h2>🌟 キャラクターしょうかい</h2>
+        <img id="character-img" src="assets/comic/characters.jpg" alt="ゆいなコミックのキャラクター紹介" />
       </section>
 
       <section class="comic-viewer glass reveal">
@@ -133,6 +152,12 @@
           { file: "assets/comic/page8.jpg", title: "第8話 なんか静かな日" },
           { file: "assets/comic/page9.jpg", title: "第9話（最終話）ちゃんとおるで" },
         ];
+        // キャラクター紹介画像があればセクションを表示
+        const introImg = document.getElementById("character-img");
+        introImg.addEventListener("load", () => {
+          document.getElementById("character-intro").hidden = false;
+        });
+
         const pageEl = document.getElementById("comic-page");
         const titleEl = document.getElementById("episode-title");
         const curEl = document.getElementById("cur-page");
