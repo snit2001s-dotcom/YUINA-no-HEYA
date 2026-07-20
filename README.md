@@ -22,20 +22,25 @@
 
 ## コンテンツの追加方法
 
+### 🚀 こうしんページ（おすすめ・ドラッグだけで公開）
+サイトの `upload.html`（フッターの「🔧 こうしんページ」）を開き、ファイルをドラッグ＆ドロップするだけで
+GitHubに自動コミットされ、1〜2分後にWeb公開されます。
+
+- 対応: 曲(mp3)／サイトBGM差し替え／動画(mp4)／コミックの話(jpg・png)／キャラ紹介画像
+- 初回のみ [GitHubトークン](https://github.com/settings/personal-access-tokens/new)
+  （codex-practice の Contents: Read and write 権限）を設定します。トークンはブラウザ内にのみ保存されます
+
 ### かんたん追加（この端末だけ）
 MUSIC・MOVIEページの「**＋ついか**」ボタンでスマホ/PC内のファイルを選ぶと、すぐ再生できます。
 ブラウザ（IndexedDB）に保存されるため、その端末だけで見られます。
 
-### みんなに公開する追加
-1. ファイルをアップロード
-   - 曲: `assets/audio/`（mp3）
-   - 動画: `assets/video/`（mp4）
-   - コミック: `assets/comic/`（jpg/png）
-2. `assets/media.json` に1行追加
+### 手動での追加
+1. ファイルをアップロード（曲: `assets/audio/`、動画: `assets/video/`、コミック: `assets/comic/`）
+2. `assets/media.json` の該当リストに1行追加
    ```json
    { "file": "assets/audio/newsong.mp3", "title": "あたらしい曲", "emoji": "🎵" }
    ```
-   コミックは `comic.html` 内の `EPISODES` リストに追加します。
+   コミックは `comics`、キャラ紹介画像は `characterImage` を編集します。
 
 ### その他の差し替えポイント
 

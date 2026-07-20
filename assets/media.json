@@ -1,10 +1,22 @@
 {
   "bgm": "assets/audio/bgm.mp3",
+  "characterImage": "",
   "tracks": [
     { "file": "assets/audio/bgm.mp3", "title": "ユイナへのメロディー V2.0", "emoji": "🌸" },
     { "file": "assets/audio/track2.mp3", "title": "小さな勇者 V1.0", "emoji": "⚔️" }
   ],
   "videos": [
     { "file": "assets/video/movie.mp4", "title": "ゆいなAIムービー", "emoji": "🎬" }
+  ],
+  "comics": [
+    { "file": "assets/comic/page1.jpg", "title": "第1話 テスト勉強編" },
+    { "file": "assets/comic/page2.jpg", "title": "第2話 はよ寝なさい選手権" },
+    { "file": "assets/comic/page3.jpg", "title": "第3話 プリン編" },
+    { "file": "assets/comic/page4.jpg", "title": "第4話 くら寿司バトル編" },
+    { "file": "assets/comic/page5.jpg", "title": "第5話 お小遣い交渉編" },
+    { "file": "assets/comic/page6.jpg", "title": "第6話 テスト結果が返ってきた" },
+    { "file": "assets/comic/page7.jpg", "title": "第7話 ずっと前からおったで" },
+    { "file": "assets/comic/page8.jpg", "title": "第8話 なんか静かな日" },
+    { "file": "assets/comic/page9.jpg", "title": "第9話（最終話）ちゃんとおるで" }
   ]
 }

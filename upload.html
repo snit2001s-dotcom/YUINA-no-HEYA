@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ゆいなのへや — こうしんページ</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .panel {
+        margin: 26px auto 0;
+        width: min(100%, 760px);
+        padding: clamp(18px, 3vw, 28px);
+      }
+      .panel h2 { margin: 0 0 12px; font-size: 1.15rem; font-weight: 900; }
+      .panel p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.9; margin: 0 0 10px; }
+      .panel label { display: block; font-weight: 900; font-size: 0.85rem; margin: 14px 0 6px; }
+      .panel input[type="password"], .panel input[type="text"] {
+        width: 100%;
+        font-family: inherit;
+        font-size: 0.95rem;
+        padding: 10px 14px;
+        border: 2px solid #ffd6e8;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--text);
+        box-sizing: border-box;
+      }
+      .panel input:focus { outline: none; border-color: #ff9ecb; }
+      .token-status { font-weight: 900; font-size: 0.85rem; margin-top: 8px; }
+      .token-status.ok { color: #2fa46a; }
+      .token-status.ng { color: #d9668f; }
+
+      #drop-zone {
+        margin-top: 16px;
+        border: 3px dashed #ff9ecb;
+        border-radius: 20px;
+        background: #fff6fa;
+        padding: 44px 20px;
+        text-align: center;
+        font-weight: 900;
+        color: #ff5f9e;
+        transition: background 0.2s ease, transform 0.2s ease;
+        cursor: pointer;
+      }
+      #drop-zone.dragover { background: #ffe9f3; transform: scale(1.02); }
+      #drop-zone .big { font-size: 2.4rem; display: block; margin-bottom: 8px; }
+
+      .queue { margin-top: 18px; display: grid; gap: 10px; }
+      .q-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px 14px;
+        align-items: center;
+        background: #fff;
+        border: 2px solid #ffe3ef;
+        border-radius: 14px;
+        padding: 12px 16px;
+      }
+      .q-item .name { font-weight: 900; font-size: 0.9rem; word-break: break-all; }
+      .q-item .controls { display: flex; gap: 8px; flex-wrap: wrap; grid-column: 1 / -1; }
+      .q-item select, .q-item input[type="text"] {
+        font-family: inherit;
+        font-size: 0.85rem;
+        padding: 7px 10px;
+        border: 2px solid #ffd6e8;
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+      }
+      .q-item input[type="text"] { flex: 1; min-width: 140px; }
+      .q-item .status { font-size: 0.8rem; font-weight: 900; color: var(--text-dim); }
+      .q-item .status.ok { color: #2fa46a; }
+      .q-item .status.ng { color: #d9668f; }
+      .actions { margin-top: 16px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      details.howto { margin-top: 14px; }
+      details.howto summary { cursor: pointer; font-weight: 900; color: #7c5fd3; }
+      details.howto ol { color: var(--text-dim); font-size: 0.88rem; line-height: 2; }
+      details.howto a { color: #ff5f9e; font-weight: 900; }
+    </style>
+  </head>
+  <body>
+    <div class="aurora" aria-hidden="true"><span class="blob"></span></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">🎀 ゆいなのへや</a>
+      <nav class="site-nav" aria-label="メインナビゲーション">
+        <a href="comic.html">COMIC</a>
+        <a href="game.html">GAME</a>
+        <a href="movie.html">MOVIE</a>
+        <a href="music.html">MUSIC</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="page-hero">
+        <p class="eyebrow">Admin</p>
+        <h1><span class="gradient-text">こうしんページ</span></h1>
+        <p class="lead">ファイルをドラッグするだけで、サイトに自動でアップロード＆公開されます🚀</p>
+      </section>
+
+      <!-- 設定 -->
+      <section class="panel glass reveal">
+        <h2>⚙️ はじめての設定（1回だけ）</h2>
+        <p>
+          アップロードには GitHub のアクセストークンが必要です。トークンはこのブラウザの中にだけ保存され、
+          サイトには公開されません。
+        </p>
+        <label for="token">GitHubトークン</label>
+        <input type="password" id="token" placeholder="github_pat_..." autocomplete="off" />
+        <label for="branch">ブランチ名</label>
+        <input type="text" id="branch" />
+        <div class="token-status" id="token-status"></div>
+        <details class="howto">
+          <summary>トークンのつくりかた</summary>
+          <ol>
+            <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHubのトークン作成ページ</a>を開く</li>
+            <li>「Repository access」で <strong>Only select repositories → codex-practice</strong> を選ぶ</li>
+            <li>「Permissions → Repository permissions → <strong>Contents</strong>」を <strong>Read and write</strong> にする</li>
+            <li>「Generate token」を押して、表示された <code>github_pat_...</code> を上の欄に貼り付ける</li>
+          </ol>
+        </details>
+      </section>
+
+      <!-- ドロップゾーン -->
+      <section class="panel glass reveal">
+        <h2>📤 ファイルをついか</h2>
+        <div id="drop-zone">
+          <span class="big">🎁</span>
+          ここにファイルをドラッグ＆ドロップ<br />
+          <span style="font-size: 0.8rem; color: var(--text-dim)">（クリックしてえらぶこともできます）</span>
+          <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-dim); font-weight: 700">
+            🎵 mp3 → 曲・BGM ／ 🎬 mp4 → 動画 ／ 🖼 png・jpg → コミック・キャラしょうかい
+          </div>
+        </div>
+        <div class="queue" id="queue"></div>
+        <div class="actions">
+          <button class="btn" id="upload-btn" type="button" disabled>🚀 アップロードして公開</button>
+        </div>
+        <p style="margin-top: 14px; text-align: center;">
+          公開まで1〜2分かかります（GitHub Pagesの再デプロイ待ち）。
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>© 2026 YUINA — Made with 💖</p>
+    </footer>
+
+    <script src="js/reveal.js"></script>
+    <script>
+      (() => {
+        const OWNER = "snit2001s-dotcom";
+        const REPO = "codex-practice";
+        const DEFAULT_BRANCH = "claude/yuina-website-redesign-e6k69d";
+        const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/`;
+
+        const tokenInput = document.getElementById("token");
+        const branchInput = document.getElementById("branch");
+        const tokenStatus = document.getElementById("token-status");
+        const dropZone = document.getElementById("drop-zone");
+        const queueEl = document.getElementById("queue");
+        const uploadBtn = document.getElementById("upload-btn");
+        let queue = [];
+
+        // --- 設定の保存と確認 ---
+        tokenInput.value = localStorage.getItem("yuina-gh-token") || "";
+        branchInput.value = localStorage.getItem("yuina-gh-branch") || DEFAULT_BRANCH;
+        tokenInput.addEventListener("change", () => {
+          localStorage.setItem("yuina-gh-token", tokenInput.value.trim());
+          checkToken();
+        });
+        branchInput.addEventListener("change", () =>
+          localStorage.setItem("yuina-gh-branch", branchInput.value.trim())
+        );
+
+        function headers() {
+          return {
+            Authorization: `Bearer ${tokenInput.value.trim()}`,
+            Accept: "application/vnd.github+json",
+          };
+        }
+
+        async function checkToken() {
+          if (!tokenInput.value.trim()) {
+            tokenStatus.textContent = "トークンが未設定です";
+            tokenStatus.className = "token-status ng";
+            return false;
+          }
+          try {
+            const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, { headers: headers() });
+            if (res.ok) {
+              tokenStatus.textContent = "✅ 接続OK！アップロードできます";
+              tokenStatus.className = "token-status ok";
+              return true;
+            }
+          } catch {}
+          tokenStatus.textContent = "❌ 接続できません（トークンを確認してね）";
+          tokenStatus.className = "token-status ng";
+          return false;
+        }
+        checkToken();
+
+        // --- ファイル受付 ---
+        const picker = document.createElement("input");
+        picker.type = "file";
+        picker.multiple = true;
+        picker.accept = "audio/*,video/*,image/*";
+        picker.style.display = "none";
+        document.body.appendChild(picker);
+        dropZone.addEventListener("click", () => picker.click());
+        picker.addEventListener("change", () => { addFiles(picker.files); picker.value = ""; });
+
+        ["dragenter", "dragover"].forEach((ev) =>
+          dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add("dragover"); })
+        );
+        ["dragleave", "drop"].forEach((ev) =>
+          dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove("dragover"); })
+        );
+        dropZone.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+
+        function guessKind(file) {
+          if (file.type.startsWith("audio/") || /\.(mp3|m4a|wav)$/i.test(file.name)) return "track";
+          if (file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name)) return "video";
+          if (file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name)) return "comic";
+          return "";
+        }
+
+        function addFiles(files) {
+          for (const file of files) {
+            const kind = guessKind(file);
+            if (!kind) { alert(`「${file.name}」は対応していないファイルです`); continue; }
+            const item = { file, kind, title: file.name.replace(/\.[^.]+$/, "") };
+            queue.push(item);
+            renderQueue();
+          }
+        }
+
+        const KIND_LABELS = {
+          track: "🎵 曲としてついか",
+          bgm: "🔊 サイトBGMにする",
+          video: "🎬 動画としてついか",
+          comic: "📖 コミックの話としてついか",
+          character: "🌟 キャラしょうかい画像にする",
+        };
+        const KIND_OPTIONS = {
+          track: ["track", "bgm"],
+          video: ["video"],
+          comic: ["comic", "character"],
+        };
+
+        function renderQueue() {
+          queueEl.innerHTML = "";
+          queue.forEach((item, i) => {
+            const row = document.createElement("div");
+            row.className = "q-item";
+            const opts = (KIND_OPTIONS[guessKind(item.file)] || [item.kind])
+              .map((k) => `<option value="${k}" ${k === item.kind ? "selected" : ""}>${KIND_LABELS[k]}</option>`)
+              .join("");
+            row.innerHTML = `
+              <div class="name">${item.file.name}</div>
+              <div class="status">${item.status || "じゅんびOK"}</div>
+              <div class="controls">
+                <select data-i="${i}" class="kind-sel">${opts}</select>
+                <input type="text" data-i="${i}" class="title-in" value="${item.title}" placeholder="タイトル" />
+                <button class="remove-btn" data-i="${i}" type="button">けす</button>
+              </div>`;
+            queueEl.appendChild(row);
+          });
+          queueEl.querySelectorAll(".kind-sel").forEach((s) =>
+            s.addEventListener("change", () => (queue[s.dataset.i].kind = s.value))
+          );
+          queueEl.querySelectorAll(".title-in").forEach((s) =>
+            s.addEventListener("input", () => (queue[s.dataset.i].title = s.value))
+          );
+          queueEl.querySelectorAll(".remove-btn").forEach((b) =>
+            b.addEventListener("click", () => { queue.splice(b.dataset.i, 1); renderQueue(); })
+          );
+          uploadBtn.disabled = queue.length === 0;
+        }
+
+        // --- GitHubへアップロード ---
+        function toBase64(file) {
+          return new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result.split(",")[1]);
+            r.onerror = () => reject(r.error);
+            r.readAsDataURL(file);
+          });
+        }
+
+        function safeName(name) {
+          const ext = (name.match(/\.[^.]+$/) || [""])[0].toLowerCase();
+          const base = name.replace(/\.[^.]+$/, "").replace(/[^\w\-ぁ-んァ-ヶ一-龠ー]/g, "_");
+          return Date.now().toString(36) + "_" + base.slice(0, 40) + ext;
+        }
+
+        async function putFile(path, base64, message, sha) {
+          const body = { message, content: base64, branch: branchInput.value.trim() };
+          if (sha) body.sha = sha;
+          const res = await fetch(API + path, {
+            method: "PUT",
+            headers: { ...headers(), "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+          return res.json();
+        }
+
+        async function getFile(path) {
+          const res = await fetch(API + path + `?ref=${encodeURIComponent(branchInput.value.trim())}`, {
+            headers: headers(),
+          });
+          if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
+          return res.json();
+        }
+
+        function b64DecodeUtf8(b64) {
+          return new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g, "")), (c) => c.charCodeAt(0)));
+        }
+        function b64EncodeUtf8(str) {
+          return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+        }
+
+        uploadBtn.addEventListener("click", async () => {
+          if (!(await checkToken())) return;
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = "アップロード中…";
+
+          try {
+            // 1. 各ファイルをアップロード
+            for (const item of queue) {
+              item.status = "アップロード中…";
+              renderQueueStatus();
+              const base64 = await toBase64(item.file);
+              let dir = { track: "assets/audio/", bgm: "assets/audio/", video: "assets/video/", comic: "assets/comic/", character: "assets/comic/" }[item.kind];
+              item.path = dir + safeName(item.file.name);
+              await putFile(item.path, base64, `Add ${item.kind}: ${item.title}`);
+              item.status = "✅ アップ完了";
+              renderQueueStatus();
+            }
+
+            // 2. media.json を更新
+            const metaFile = await getFile("assets/media.json");
+            const meta = JSON.parse(b64DecodeUtf8(metaFile.content));
+            for (const item of queue) {
+              if (item.kind === "track") meta.tracks.push({ file: item.path, title: item.title, emoji: "🎵" });
+              if (item.kind === "bgm") { meta.bgm = item.path; meta.tracks.push({ file: item.path, title: item.title, emoji: "🔊" }); }
+              if (item.kind === "video") meta.videos.push({ file: item.path, title: item.title, emoji: "🎬" });
+              if (item.kind === "comic") meta.comics.push({ file: item.path, title: item.title });
+              if (item.kind === "character") meta.characterImage = item.path;
+            }
+            await putFile(
+              "assets/media.json",
+              b64EncodeUtf8(JSON.stringify(meta, null, 2) + "\n"),
+              "Update media.json (こうしんページから追加)",
+              metaFile.sha
+            );
+
+            alert("🎉 アップロード完了！1〜2分後にサイトへ反映されます");
+            queue = [];
+            renderQueue();
+          } catch (err) {
+            alert("アップロードに失敗しました: " + err.message);
+          } finally {
+            uploadBtn.disabled = queue.length === 0;
+            uploadBtn.textContent = "🚀 アップロードして公開";
+          }
+        });
+
+        function renderQueueStatus() {
+          queueEl.querySelectorAll(".q-item").forEach((row, i) => {
+            const st = row.querySelector(".status");
+            st.textContent = queue[i].status || "じゅんびOK";
+            st.className = "status" + (queue[i].status?.startsWith("✅") ? " ok" : "");
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -114,7 +114,7 @@
       <!-- キャラクター紹介（assets/comic/characters.jpg があれば表示） -->
       <section class="character-intro glass reveal" id="character-intro" hidden>
         <h2>🌟 キャラクターしょうかい</h2>
-        <img id="character-img" src="assets/comic/characters.jpg" alt="ゆいなコミックのキャラクター紹介" />
+        <img id="character-img" alt="ゆいなコミックのキャラクター紹介" />
       </section>
 
       <section class="comic-viewer glass reveal">
@@ -135,13 +135,14 @@
 
     <footer class="site-footer">
       <p>© 2026 YUINA — Made with 💖</p>
+      <p><a href="upload.html" style="color: #c9b8d6; font-size: 0.75rem; text-decoration: none;">🔧 こうしんページ</a></p>
     </footer>
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
     <script>
-      (() => {
-        const EPISODES = [
+      (async () => {
+        const FALLBACK_EPISODES = [
           { file: "assets/comic/page1.jpg", title: "第1話 テスト勉強編" },
           { file: "assets/comic/page2.jpg", title: "第2話 はよ寝なさい選手権" },
           { file: "assets/comic/page3.jpg", title: "第3話 プリン編" },
@@ -152,11 +153,25 @@
           { file: "assets/comic/page8.jpg", title: "第8話 なんか静かな日" },
           { file: "assets/comic/page9.jpg", title: "第9話（最終話）ちゃんとおるで" },
         ];
+
+        // media.json から話リストとキャラ紹介画像を読み込み（無ければ予備リスト）
+        let EPISODES = FALLBACK_EPISODES;
+        let characterImage = "assets/comic/characters.jpg";
+        try {
+          const res = await fetch("assets/media.json");
+          if (res.ok) {
+            const m = await res.json();
+            if (Array.isArray(m.comics) && m.comics.length) EPISODES = m.comics;
+            if (m.characterImage) characterImage = m.characterImage;
+          }
+        } catch {}
+
         // キャラクター紹介画像があればセクションを表示
         const introImg = document.getElementById("character-img");
         introImg.addEventListener("load", () => {
           document.getElementById("character-intro").hidden = false;
         });
+        introImg.src = characterImage;
 
         const pageEl = document.getElementById("comic-page");
         const titleEl = document.getElementById("episode-title");
