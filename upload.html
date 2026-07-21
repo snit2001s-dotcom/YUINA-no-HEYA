@@ -130,7 +130,8 @@
           ここにファイルをドラッグ＆ドロップ<br />
           <span style="font-size: 0.8rem; color: var(--text-dim)">（クリックしてえらぶこともできます）</span>
           <div style="margin-top: 10px; font-size: 0.78rem; color: var(--text-dim); font-weight: 700">
-            🎵 mp3 → 曲・BGM ／ 🎬 mp4 → 動画 ／ 🖼 png・jpg → コミック・キャラしょうかい
+            🎵 mp3 → 曲・BGM ／ 🎬 mp4・mov → 動画 ／ 🖼 画像 → コミック・キャラ紹介・曲サムネ<br />
+            🖼 ファイル名が <code>BG_</code> で始まる画像 → 背景画像（ランダム表示）
           </div>
         </div>
         <div class="queue" id="queue"></div>
@@ -148,6 +149,7 @@
     </footer>
 
     <script src="js/reveal.js"></script>
+    <script src="js/background.js"></script>
     <script>
       (() => {
         // GitHub Pages のURLから owner / repo を自動判定（リポジトリ名を変えてもそのまま動く）
@@ -207,11 +209,20 @@
         }
         checkToken();
 
+        // 既存の曲リスト（サムネ紐付け用）を読み込む
+        let siteTracks = [];
+        (async () => {
+          try {
+            const res = await fetch("assets/media.json?t=" + Date.now(), { cache: "no-store" });
+            if (res.ok) siteTracks = (await res.json()).tracks || [];
+          } catch {}
+        })();
+
         // --- ファイル受付 ---
         const picker = document.createElement("input");
         picker.type = "file";
         picker.multiple = true;
-        picker.accept = "audio/*,video/*,image/*";
+        picker.accept = "audio/*,video/*,video/quicktime,.mov,image/*";
         picker.style.display = "none";
         document.body.appendChild(picker);
         dropZone.addEventListener("click", () => picker.click());
@@ -225,10 +236,13 @@
         );
         dropZone.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
 
+        function isImage(file) {
+          return file.type.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+        }
         function guessKind(file) {
           if (file.type.startsWith("audio/") || /\.(mp3|m4a|wav)$/i.test(file.name)) return "track";
-          if (file.type.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(file.name)) return "video";
-          if (file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name)) return "comic";
+          if (file.type.startsWith("video/") || /\.(mp4|mov|webm|m4v)$/i.test(file.name)) return "video";
+          if (isImage(file)) return /^BG_/i.test(file.name) ? "background" : "comic";
           return "";
         }
 
@@ -237,6 +251,7 @@
             const kind = guessKind(file);
             if (!kind) { alert(`「${file.name}」は対応していないファイルです`); continue; }
             const item = { file, kind, title: file.name.replace(/\.[^.]+$/, "") };
+            if (kind === "trackthumb") item.target = siteTracks[0] && siteTracks[0].file;
             queue.push(item);
             renderQueue();
           }
@@ -248,11 +263,15 @@
           video: "🎬 動画としてついか",
           comic: "📖 コミックの話としてついか",
           character: "🌟 キャラしょうかい画像にする",
+          background: "🖼 背景画像にする",
+          trackthumb: "🎵 曲のサムネにする",
         };
+        const IMAGE_KINDS = ["comic", "character", "background", "trackthumb"];
         const KIND_OPTIONS = {
           track: ["track", "bgm"],
           video: ["video"],
-          comic: ["comic", "character"],
+          comic: IMAGE_KINDS,
+          background: ["background", "comic", "character", "trackthumb"],
         };
 
         function renderQueue() {
@@ -263,18 +282,39 @@
             const opts = (KIND_OPTIONS[guessKind(item.file)] || [item.kind])
               .map((k) => `<option value="${k}" ${k === item.kind ? "selected" : ""}>${KIND_LABELS[k]}</option>`)
               .join("");
+            // 曲サムネのときは、どの曲用かを選ぶドロップダウンを出す
+            const trackSel = item.kind === "trackthumb"
+              ? `<select data-i="${i}" class="track-sel">${
+                  siteTracks.length
+                    ? siteTracks.map((t) => `<option value="${t.file}" ${t.file === item.target ? "selected" : ""}>${t.title}</option>`).join("")
+                    : '<option value="">（曲がありません）</option>'
+                }</select>`
+              : "";
+            // 背景・サムネはタイトル入力を隠す
+            const titleIn = (item.kind === "background" || item.kind === "trackthumb")
+              ? ""
+              : `<input type="text" data-i="${i}" class="title-in" value="${item.title}" placeholder="タイトル" />`;
             row.innerHTML = `
               <div class="name">${item.file.name}</div>
               <div class="status">${item.status || "じゅんびOK"}</div>
               <div class="controls">
                 <select data-i="${i}" class="kind-sel">${opts}</select>
-                <input type="text" data-i="${i}" class="title-in" value="${item.title}" placeholder="タイトル" />
+                ${trackSel}
+                ${titleIn}
                 <button class="remove-btn" data-i="${i}" type="button">けす</button>
               </div>`;
             queueEl.appendChild(row);
           });
           queueEl.querySelectorAll(".kind-sel").forEach((s) =>
-            s.addEventListener("change", () => (queue[s.dataset.i].kind = s.value))
+            s.addEventListener("change", () => {
+              const item = queue[s.dataset.i];
+              item.kind = s.value;
+              if (item.kind === "trackthumb" && !item.target) item.target = siteTracks[0] && siteTracks[0].file;
+              renderQueue();
+            })
+          );
+          queueEl.querySelectorAll(".track-sel").forEach((s) =>
+            s.addEventListener("change", () => (queue[s.dataset.i].target = s.value))
           );
           queueEl.querySelectorAll(".title-in").forEach((s) =>
             s.addEventListener("input", () => (queue[s.dataset.i].title = s.value))
@@ -339,7 +379,7 @@
               item.status = "アップロード中…";
               renderQueueStatus();
               const base64 = await toBase64(item.file);
-              let dir = { track: "assets/audio/", bgm: "assets/audio/", video: "assets/video/", comic: "assets/comic/", character: "assets/comic/" }[item.kind];
+              let dir = { track: "assets/audio/", bgm: "assets/audio/", video: "assets/video/", comic: "assets/comic/", character: "assets/comic/", background: "assets/img/", trackthumb: "assets/img/" }[item.kind];
               item.path = dir + safeName(item.file.name);
               await putFile(item.path, base64, `Add ${item.kind}: ${item.title}`);
               item.status = "✅ アップ完了";
@@ -355,6 +395,11 @@
               if (item.kind === "video") meta.videos.push({ file: item.path, title: item.title, emoji: "🎬" });
               if (item.kind === "comic") meta.comics.push({ file: item.path, title: item.title });
               if (item.kind === "character") meta.characterImage = item.path;
+              if (item.kind === "background") { meta.backgrounds = meta.backgrounds || []; meta.backgrounds.push(item.path); }
+              if (item.kind === "trackthumb") {
+                const t = (meta.tracks || []).find((x) => x.file === item.target);
+                if (t) t.thumb = item.path;
+              }
             }
             await putFile(
               "assets/media.json",

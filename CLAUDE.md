@@ -40,6 +40,19 @@
   （GitHub Pagesの10分キャッシュ対策。この付与を外すとアップロード反映が遅れるクレームが再発する）
 - fetch失敗時は各ページ内の FALLBACK_* 配列で表示継続
 - コンテンツ追加＝ファイル設置＋media.json追記。**HTMLの編集は不要**という設計を維持すること
+- キー: `bgm`(str) / `characterImage`(str) / `backgrounds`(配列, BG画像パス) /
+  `tracks`(配列, {file,title,emoji,thumb?}) / `videos`(配列) / `comics`(配列)
+
+### 背景画像（js/background.js・全ページ読込）
+- `backgrounds` 配列からページを開くたびランダムに1枚選び、bodyに `.bg-image` を prepend
+- 薄く半透明（opacity 0.14）で画面全体に cover 表示。空配列なら従来のパステル背景のまま
+- こうしんページで **ファイル名が `BG_` で始まる画像**は種類「背景画像」に自動振り分けされ `assets/img/` へ保存
+
+### 曲サムネ / 動画サムネ
+- MUSIC: track に `thumb`(画像パス) があれば `.art` に画像表示、無ければ絵文字。
+  こうしんページで画像を「曲のサムネにする」で選ぶと対象曲を選択して `thumb` に紐付く（SUNOのジャケ画像用）
+- MOVIE: 各動画の**冒頭フレームを非表示のprobe videoでcanvasに描画し poster に自動設定**（movie.html内 makeThumbnail）。
+  ※headless chromiumはH.264非対応でテスト時posterは生成されないが実ブラウザでは生成される
 
 ### BGM（js/bgm.js）
 - 自動再生規制のため初回クリック/タップで開始し、**音量0→0.35へ約4秒フェードイン**（急に鳴らさない＝当初の重要要件）
@@ -50,8 +63,9 @@
 - ブラウザから GitHub Contents API へ直接PUTしてコミット→Pagesが自動再デプロイ、という**サーバーレス更新機構**
 - owner/repo は **PagesのURLから自動判定**（リポジトリ名を変えても動く）。localhost時は既定値にフォールバック
 - トークンは localStorage `yuina-gh-token`（Fine-grained PAT / Contents: Read and write）。ブランチは `yuina-gh-branch`
-- 種類: 曲 / サイトBGM差替 / 動画 / コミックの話 / キャラ紹介画像。アップ後に media.json も自動更新する
-- ファイル名は `safeName()` でタイムスタンプ+サニタイズされる
+- 種類: 曲 / サイトBGM差替 / 動画(mp4・mov) / コミックの話 / キャラ紹介画像 / 背景画像 / 曲サムネ。
+  アップ後に media.json も自動更新する
+- ファイル名は `safeName()` でタイムスタンプ+サニタイズされる。画像の種類は `BG_` 始まりで背景に自動判定
 
 ### ローカル追加（js/media-store.js）
 - MUSIC/MOVIEの「＋ついか」はIndexedDBに保存する**その端末限定**機能（「この端末のみ」バッジ＋削除ボタン）。

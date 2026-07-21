@@ -22,6 +22,7 @@
         aspect-ratio: 16 / 9;
         border-radius: 14px;
         background: #000;
+        object-fit: cover;
       }
       .video-item .head {
         display: flex;
@@ -81,6 +82,7 @@
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
+    <script src="js/background.js"></script>
     <script src="js/media-store.js"></script>
     <script>
       (() => {
@@ -88,6 +90,36 @@
           { file: "assets/video/movie.mp4", title: "ゆいなAIムービー", emoji: "🎬" },
         ];
         const wrap = document.getElementById("videos");
+
+        // 動画の最初のフレームを取り出してポスター画像に設定（サムネ表示）
+        function makeThumbnail(video, src) {
+          // 表示用videoは軽くしたいので、別の非表示videoでフレームを取得する
+          const probe = document.createElement("video");
+          probe.preload = "auto";
+          probe.muted = true;
+          probe.playsInline = true;
+          probe.crossOrigin = "anonymous";
+          probe.src = src;
+          let done = false;
+          const capture = () => {
+            if (done || !probe.videoWidth) return;
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = probe.videoWidth;
+              canvas.height = probe.videoHeight;
+              canvas.getContext("2d").drawImage(probe, 0, 0, canvas.width, canvas.height);
+              video.setAttribute("poster", canvas.toDataURL("image/jpeg", 0.7));
+              done = true;
+            } catch {}
+            probe.removeAttribute("src");
+            probe.load();
+          };
+          probe.addEventListener("loadeddata", () => {
+            // 冒頭0秒だと真っ黒なことがあるので少し進めてから取得
+            try { probe.currentTime = 0.1; } catch { capture(); }
+          });
+          probe.addEventListener("seeked", capture);
+        }
 
         function makeVideo({ title, emoji, src, isLocal, id }) {
           const el = document.createElement("article");
@@ -100,6 +132,8 @@
             <video controls preload="metadata" playsinline></video>`;
           const video = el.querySelector("video");
           video.src = src;
+          // 動画の冒頭フレームを自動でサムネ（poster）にする
+          makeThumbnail(video, src);
           // 動画をさいせいしたらサイトBGMと他の動画をとめる
           video.addEventListener("play", () => {
             document.querySelectorAll("video, audio").forEach((m) => { if (m !== video) m.pause(); });
@@ -145,7 +179,7 @@
           });
         }
 
-        MediaStore.setupAddButton(document.getElementById("add-video-btn"), "video", "video/mp4,video/*", render);
+        MediaStore.setupAddButton(document.getElementById("add-video-btn"), "video", "video/mp4,video/quicktime,.mov,video/*", render);
         render();
       })();
     </script>

@@ -1,6 +1,7 @@
 {
   "bgm": "assets/audio/bgm.mp3",
   "characterImage": "assets/comic/mrsrbo4w_キャラクター紹介.png",
+  "backgrounds": [],
   "tracks": [
     {
       "file": "assets/audio/bgm.mp3",

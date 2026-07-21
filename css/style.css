@@ -300,6 +300,20 @@ body {
   font-size: 0.85em;
 }
 
+/* --- ページ背景画像（BG_ 画像をランダムに薄く全画面表示） --- */
+.bg-image {
+  position: fixed;
+  inset: 0;
+  z-index: -3;               /* aurora(-2) より奥 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.14;             /* 薄く半透明 */
+  pointer-events: none;
+  animation: bg-fade 1.4s ease;
+}
+@keyframes bg-fade { from { opacity: 0; } to { opacity: 0.14; } }
+
 /* --- ローカル追加コンテンツ（この端末のみ）バッジと削除ボタン --- */
 .local-badge {
   display: inline-block;

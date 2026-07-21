@@ -31,7 +31,9 @@
         font-size: 1.5rem;
         background: linear-gradient(135deg, rgba(255, 180, 84, 0.25), rgba(255, 127, 181, 0.25));
         border: 3px solid #fff;
+        overflow: hidden;
       }
+      .track .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .track h3 { margin: 0 0 2px; font-size: 1.05rem; font-weight: 900; }
       .track .artist { margin: 0 0 10px; color: var(--text-dim); font-size: 0.8rem; font-weight: 700; }
       .track audio { width: 100%; height: 36px; }
@@ -89,6 +91,7 @@
 
     <script src="js/bgm.js"></script>
     <script src="js/reveal.js"></script>
+    <script src="js/background.js"></script>
     <script src="js/media-store.js"></script>
     <script>
       (() => {
@@ -99,11 +102,14 @@
         ];
         const wrap = document.getElementById("tracks");
 
-        function makeTrack({ title, emoji, src, isLocal, id, index }) {
+        function makeTrack({ title, emoji, thumb, src, isLocal, id, index }) {
           const el = document.createElement("article");
           el.className = "track glass";
+          const art = thumb
+            ? `<div class="art"><img src="${thumb}" alt="" loading="lazy" /></div>`
+            : `<div class="art" aria-hidden="true">${emoji || "🎵"}</div>`;
           el.innerHTML = `
-            <div class="art" aria-hidden="true">${emoji || "🎵"}</div>
+            ${art}
             <div>
               <div class="head">
                 <h3>${title}${isLocal ? '<span class="local-badge">この端末のみ</span>' : ""}</h3>
@@ -138,7 +144,7 @@
             if (res.ok) tracks = (await res.json()).tracks || FALLBACK_TRACKS;
           } catch {}
           tracks.forEach((t, i) => {
-            wrap.appendChild(makeTrack({ title: t.title, emoji: t.emoji, src: t.file, index: i + 1 }));
+            wrap.appendChild(makeTrack({ title: t.title, emoji: t.emoji, thumb: t.thumb, src: t.file, index: i + 1 }));
           });
           try {
             const locals = await MediaStore.list("music");
